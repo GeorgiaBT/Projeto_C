@@ -24,7 +24,7 @@ Regras de Desenvolvimento
 --------------------------------------------------------------------------------------------------------------------
     Menu seleciona estoque ou cliente
     1. Menu Cliente
-        Cadastro de cliente (Nome, CPF, Nascimento, Telefone, Email, Endereco);
+        Cadastro de cliente (Nome, CPF, Telefone, Email, Endereco);
         Consultar cliente (informações cadastradas + produtos comprados (qual produto, quantidade e valor gasto));
         Excluir cliente (busca por cpf, opcao de confirmar ou cancelar)
         Compra de produtos (Pede o cliente que vai realizar a compra e valida o cadastro com CPF>> Pede o produto/codigo do produto >> Pede a quantidade >> mostra o valor a ser gasto >> confirma/cancela >> atualiza o estoque)
