@@ -4,9 +4,7 @@
 #include <stdbool.h>
 /*
 O que fazer:
-Corrigir os erros que envolvem o editar produto(inserirProdutos) pois não ta funcionando direito
 criar a funcao editar cliente (so vai permitir editar telefone, email e endereco ja q ngm muda de nome nem cpf)
-Corrigir a funcao que cria o arquivo pedidos pois esta imprimindo errado
 
 Rever o codigo:
     -EM todos os lugares que for possivel, vamos alocar memoria
@@ -40,6 +38,7 @@ typedef struct
 
 //funções base
 int menuOpcoes();
+void switchMenuInicial(int opcaoCE, Produto **produto, Cliente **clientes,int *numProdutos,int *numClientes);
 int menuClientes();
 int menuEstoque();
 void encerraPrograma();
@@ -47,6 +46,7 @@ Cliente *lerArquivoClientes(Cliente *clientes, int *numCliente);
 Produto *lerArquivoProdutos(Produto *produtos, int *numProdutos);
 
 //funções clientes
+void switchCliente(int opcao, Cliente **clientes, int *numCliente,Produto **produto, int *numProduto);
 int menuCadastros();
 int menuListar();
 void switchCadastros(int opcao, Cliente **clientes, int *numCLiente);
@@ -59,9 +59,10 @@ void listaTodosClientes(Cliente *clientes, int numClientes);
 void buscaCLiente(Cliente *clientes, int numClientes);
 void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos);
 void atualizarEstoqueFile(Produto *produtos, int numProdutos);
-void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido);
+void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido, int codigoComprado);
 
 //funções produtos
+void switchEstoque(int opcao, Produto **produto, int *numProduto);
 Produto *cadastroProdutos(Produto *produto, int *numProduto);
 void fileEstoque(Produto *produto);
 void listarProdutos(Produto *produto, int numProduto);
@@ -69,15 +70,74 @@ Produto *excluiProduto(Produto *produto, int *numProduto);
 void excluirProdutoFile(int codigoExcluir);
 void buscarProduto(Produto *produto, int numProduto);
 int menuAlterarEstoque();
-void switchAlteracao(int alteracao, Produto *produto, int numProduto);
+void switchAlteracao(int alteracao, Produto *produto, int numProduto,int i);
 void inserirEstoque(Produto *produto, int numProduto);
-void alteraValorVenda(Produto *produto, int numProdutos);
-void alteraQTD(Produto *produto, int numProdutos);
-void alteraValorCusto(Produto *produto, int numProdutos);
+void alteraValorVenda(Produto *produto, int numProdutos, int i);
+void alteraQTD(Produto *produto, int numProdutos, int i);
+void alteraValorCusto(Produto *produto, int numProdutos, int i);
 int menuCadastroEstoque();
 int menuVizuEstoque();
 void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto);
 void switchVizuEstoque(int opcao, Produto **produto, int *numProduto);
+
+int main()
+{
+    int opcaoCE, numProdutos = 0, numClientes=0;
+    Cliente *clientes = NULL;
+    Produto *produto = NULL;
+    
+    clientes = lerArquivoClientes(clientes, &numClientes);
+    produto = lerArquivoProdutos(produto, &numProdutos);
+
+    do
+    {
+        opcaoCE = menuOpcoes();
+        switchMenuInicial(opcaoCE,&produto,&clientes,&numProdutos,&numClientes);
+
+    } while (opcaoCE != 3);
+    free(clientes);
+    free(produto);
+
+    return 0;
+}
+
+
+void switchMenuInicial(int opcaoCE, Produto **produto, Cliente **clientes,int *numProdutos,int *numClientes){
+
+    int opcao;
+    switch (opcaoCE)
+        {
+
+        case 1:
+
+            do
+            {
+                opcao = menuClientes();
+                switchCliente(opcao, clientes, numClientes, produto, numProdutos);
+
+            } while (opcao < 1 || opcao > 4);
+            break;
+
+        case 2:
+
+            do
+            {
+
+                opcao = menuEstoque();
+                switchEstoque(opcao, produto, numProdutos);
+
+            } while (opcao < 1 || opcao > 3);
+            break;
+
+        case 3:
+            encerraPrograma();
+            break;
+
+        default:
+            printf("Opcao invalida! Tente novamente\n");
+        }
+
+}
 
 void switchCliente(int opcao, Cliente **clientes, int *numCliente,Produto **produto, int *numProduto)
 {
@@ -151,58 +211,6 @@ void switchEstoque(int opcao, Produto **produto, int *numProduto)
         default:
             printf("Opcao invalida! Tente novamente\n");
     }
-}
-
-int main()
-{
-    int opcaoCE, opcao, numProdutos = 0, numClientes=0;
-    Cliente *clientes = NULL;
-    Produto *produto = NULL;
-    
-    clientes = lerArquivoClientes(clientes, &numClientes);
-    produto = lerArquivoProdutos(produto, &numProdutos);
-
-    do
-    {
-        opcaoCE = menuOpcoes();
-
-        switch (opcaoCE)
-        {
-
-        case 1:
-
-            do
-            {
-                opcao = menuClientes();
-                switchCliente(opcao, &clientes, &numClientes, &produto, &numProdutos);
-
-            } while (opcao < 1 || opcao > 4);
-            break;
-
-        case 2:
-
-            do
-            {
-
-                opcao = menuEstoque();
-                switchEstoque(opcao, &produto, &numProdutos);
-
-            } while (opcao < 1 || opcao > 3);
-            break;
-
-        case 3:
-            encerraPrograma();
-            break;
-
-        default:
-            printf("Opcao invalida! Tente novamente\n");
-        }
-
-    } while (opcaoCE != 3);
-    free(clientes);
-    free(produto);
-
-    return 0;
 }
 
 Produto *lerArquivoProdutos(Produto *produtos, int *numProdutos){
@@ -440,12 +448,12 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
     scanf(" %50[^\n]", novoCliente->nome);
     printf("Digite o CPF: ");
     scanf(" %11s", novoCliente->cpf);
-    for(i =0; i<clientes; i++){
+    for(i =0; i<*numCliente; i++){
 
         if(clientes[i].cpf == novoCliente->cpf){
 
             printf("CPF já cadastrado!\n");
-            return;
+
         }
 
     }
@@ -533,9 +541,18 @@ Produto *cadastroProdutos(Produto *produto, int *numProduto)
     }
     Produto *novoProduto = &produto[*numProduto - 1];
     
-    int i;
     printf("Digite o codigo do produto: ");
     scanf("%d", &novoProduto->codigo);
+   for(int i =0; i<numProduto;i++){
+
+        if(novoProduto->codigo == produto[i].codigo){
+
+            printf("Código já cadastrado!\n");
+            return;
+
+        }
+
+   }
     getchar();
     printf("Digite o nome do produto: ");
     scanf("%51[^\n]", novoProduto->nome);
@@ -930,7 +947,7 @@ void inserirEstoque(Produto *produto, int numProduto)
             do
             {
                 alteracao = menuAlterarEstoque();
-                switchAlteracao(alteracao,produto,numProduto);
+                switchAlteracao(alteracao,produto,numProduto,i);
 
             } while (alteracao != 4);
 
@@ -941,6 +958,7 @@ void inserirEstoque(Produto *produto, int numProduto)
     if (!prodEncontrado)
     {
         printf("Produto com codigo %d nao encontrado no estoque.\n", codProduto);
+        return;
     }
 }
 
@@ -957,19 +975,19 @@ int menuAlterarEstoque(){
     return escolherAltercao;
 }
 
-void switchAlteracao(int alteracao, Produto *produto, int numProduto){
+void switchAlteracao(int alteracao, Produto *produto, int numProduto, int i){
 
     switch (alteracao)
     {
         case 1:
-            alteraQTD(produto, numProduto);
+            alteraQTD(produto, numProduto,i);
             break;
 
         case 2:
-            alteraValorCusto(produto,numProduto); 
+            alteraValorCusto(produto,numProduto,i); 
             break;
         case 3:
-            alteraValorVenda(produto,numProduto);  
+            alteraValorVenda(produto,numProduto,i);  
             break;
         case 4:
             return;
@@ -981,9 +999,8 @@ void switchAlteracao(int alteracao, Produto *produto, int numProduto){
 
 }
 
-void alteraValorVenda(Produto *produto, int numProdutos){
+void alteraValorVenda(Produto *produto, int numProdutos,int i){
 
-    int i;
     float vVendaAlterar;
 
     printf("Digite o valor a ser alterado: ");
@@ -999,9 +1016,8 @@ void alteraValorVenda(Produto *produto, int numProdutos){
         printf("Valor invalido! O valor deve ser maior que zero.\n");
     }
 }
-void alteraValorCusto(Produto *produto, int numProdutos){
+void alteraValorCusto(Produto *produto, int numProdutos,int i){
     
-    int i;
     float vCustoAlterar; 
     printf("Digite o valor a ser alterado: ");
     scanf("%f", &vCustoAlterar);
@@ -1017,9 +1033,9 @@ void alteraValorCusto(Produto *produto, int numProdutos){
     }
 }
 
-void alteraQTD(Produto *produto, int numProdutos){
+void alteraQTD(Produto *produto, int numProdutos, int i){
 
-    int qtdAdicionar,i;
+    int qtdAdicionar;
     printf("Digite a quantidade a ser adicionada: ");
     scanf("%d", &qtdAdicionar);
     if (qtdAdicionar > 0)
@@ -1110,7 +1126,7 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
         printf("Pedido realizado com sucesso! Total: R$ %.2f\n", valorGasto);
 
         atualizarEstoqueFile(produtos, numProdutos);
-        salvarPedidoNoArquivo(*clientes, produtos, &quantidadeNova, numProdutos, valorGasto);
+        salvarPedidoNoArquivo(*clientes, produtos, &quantidadeNova, numProdutos, valorGasto,codigoProduto);
         return;
 
     }else{
@@ -1142,7 +1158,7 @@ void atualizarEstoqueFile(Produto *produtos, int numProdutos)
     }
 }
 
-void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido)
+void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido, int codigoComprado)
 {
     FILE *arquivoPedido = fopen("Pedidos.txt", "a+");
     if (arquivoPedido == NULL)
@@ -1156,12 +1172,17 @@ void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *qua
 
     for (int i = 0; i < numProdutos; i++)
     {
-        fprintf(arquivoPedido, "- Produto: %s, Codigo: %d, Quantidade: %d, Preço Unitário: %.2f, Total: %.2f\n",
+        if(produtosComprados[i].codigo == codigoComprado){
+
+            fprintf(arquivoPedido, "- Produto: %s, Codigo: %d, Quantidade: %d, Preço Unitário: %.2f, Total: %.2f\n",
                 produtosComprados[i].nome,
                 produtosComprados[i].codigo,
                 quantidades[i],
                 produtosComprados[i].valorDeVenda,
                 produtosComprados[i].valorDeVenda * quantidades[i]);
+
+        }
+
     }
 
     fprintf(arquivoPedido, "---------------------------------------\n");
