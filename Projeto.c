@@ -2,12 +2,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+/*
+O que fazer:
+Corrigir os erros que envolvem o editar produto(inserirProdutos) pois não ta funcionando direito
+criar a funcao editar cliente (so vai permitir editar telefone, email e endereco ja q ngm muda de nome nem cpf)
+Corrigir a funcao que cria o arquivo pedidos pois esta imprimindo errado
 
-//Separar em mais funcoes: inserirEstoque. Verificar se todos os vetores estão alocados dinamicamente !!
-//Criar: realizar pedido e inserir produto (no file)
+Rever o codigo:
+    -EM todos os lugares que for possivel, vamos alocar memoria
+    -Onde estiver usando vetor sem ponteiro vamos fazer de ponteiro
+*/
 
-//armazenar em um file as transações (cpf, cod produto, valor gasto), buscar transações por cpf, ver total
-//total custo, total comprado, Lucros (por produto e no fim da impressão o geral)
 
 #define SAIR 0
 #define LIMPAR "cls"
@@ -42,14 +47,19 @@ Cliente *lerArquivoClientes(Cliente *clientes, int *numCliente);
 Produto *lerArquivoProdutos(Produto *produtos, int *numProdutos);
 
 //funções clientes
+int menuCadastros();
+int menuListar();
+void switchCadastros(int opcao, Cliente **clientes, int *numCLiente);
+void switchListar(int opcao, Cliente **clientes, int *numCLiente);
 Cliente *cadastroClientes(Cliente *clientes, int *numCliente);
 void fileCliente(Cliente *cliente);
 Cliente *excluirCliente(Cliente *clientes, int *numCliente);
-void excluirCLienteFile(char *cpfExcluir );
+void excluirClienteFile(char *cpfExcluir );
 void listaTodosClientes(Cliente *clientes, int numClientes);
 void buscaCLiente(Cliente *clientes, int numClientes);
-void realizarPedido();
-void atualizaPedidoFile();
+void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos);
+void atualizarEstoqueFile(Produto *produtos, int numProdutos);
+void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido);
 
 //funções produtos
 Produto *cadastroProdutos(Produto *produto, int *numProduto);
@@ -58,39 +68,50 @@ void listarProdutos(Produto *produto, int numProduto);
 Produto *excluiProduto(Produto *produto, int *numProduto);
 void excluirProdutoFile(int codigoExcluir);
 void buscarProduto(Produto *produto, int numProduto);
+int menuAlterarEstoque();
+void switchAlteracao(int alteracao, Produto *produto, int numProduto);
 void inserirEstoque(Produto *produto, int numProduto);
-void inserirEstoqueFile();
+void alteraValorVenda(Produto *produto, int numProdutos);
+void alteraQTD(Produto *produto, int numProdutos);
+void alteraValorCusto(Produto *produto, int numProdutos);
+int menuCadastroEstoque();
+int menuVizuEstoque();
+void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto);
+void switchVizuEstoque(int opcao, Produto **produto, int *numProduto);
 
-
-void switchCliente(int opcao, Cliente **clientes, int *numCliente)
+void switchCliente(int opcao, Cliente **clientes, int *numCliente,Produto **produto, int *numProduto)
 {
-
+    int opcaoMenu;
     switch (opcao)
     {
 
     case 1:
-        *clientes = cadastroClientes(*clientes, numCliente);
+
+        do
+            {
+                opcaoMenu = menuCadastros();
+                switchCadastros(opcaoMenu, clientes, numCliente);
+
+            } while (opcaoMenu < 1 || opcaoMenu > 4);
 
         break;
 
     case 2:
-        listaTodosClientes(*clientes, *numCliente);
+
+        do{
+
+            opcaoMenu = menuListar();
+            switchListar(opcaoMenu, clientes, numCliente);
+
+        }while(opcaoMenu<1 || opcaoMenu>3);
+        
         break;
 
     case 3:
-
-        buscaCLiente(*clientes, *numCliente);
+        realizarPedido(*clientes, *numCliente, *produto,  *numProduto);
         break;
 
     case 4:
-        *clientes = excluirCliente(*clientes, numCliente);
-        break;
-
-    case 5:
-        //realizar pedido
-        break;
-
-    case 6:
         return;
         break;
 
@@ -101,38 +122,34 @@ void switchCliente(int opcao, Cliente **clientes, int *numCliente)
 
 void switchEstoque(int opcao, Produto **produto, int *numProduto)
 {
-
+    int opcoes;
     switch (opcao)
     {
 
-    case 1:
-        *produto = cadastroProdutos(*produto, numProduto);
-        break;
+        case 1:
+            do{
 
-    case 2:
-        buscarProduto(*produto, *numProduto);
-        break;
+                opcoes = menuCadastroEstoque();
+                switchCadastroEstoque(opcoes, produto, numProduto);
 
-    case 3:
- 
-        *produto = excluiProduto(*produto, numProduto);
-        break;
+            }while(opcoes<1 || opcoes>4);
+            break;
 
-    case 4:
-        //falta inserir no file
-        inserirEstoque(*produto, *numProduto);
-        break;
+        case 2:
+            do{
 
-    case 5:
-        listarProdutos(*produto, *numProduto);
-        break;
+                opcoes = menuVizuEstoque();
+                switchVizuEstoque(opcoes, produto, numProduto);
 
-    case 6:
-        return;
-        break;
+            }while(opcoes<1 || opcoes>3);
+            break;
 
-    default:
-        printf("Opcao invalida! Tente novamente\n");
+        case 3:
+            return;
+            break;
+
+        default:
+            printf("Opcao invalida! Tente novamente\n");
     }
 }
 
@@ -157,9 +174,9 @@ int main()
             do
             {
                 opcao = menuClientes();
-                switchCliente(opcao, &clientes, &numClientes);
+                switchCliente(opcao, &clientes, &numClientes, &produto, &numProdutos);
 
-            } while (opcao < 1 || opcao > 5);
+            } while (opcao < 1 || opcao > 4);
             break;
 
         case 2:
@@ -170,7 +187,7 @@ int main()
                 opcao = menuEstoque();
                 switchEstoque(opcao, &produto, &numProdutos);
 
-            } while (opcao < 1 || opcao > 6);
+            } while (opcao < 1 || opcao > 3);
             break;
 
         case 3:
@@ -252,21 +269,61 @@ int menuOpcoes()
 
 int menuClientes()
 {
-
     int opcao;
     system(LIMPAR);
     printf("===================================== Menu de Cliente =====================================\n");
-    printf("1 - Cadastrar cliente\n");
+    printf("1 - Cadastros\n");
     printf("2 - Listar clientes\n");
-    printf("3 - Buscar cliente\n");
-    printf("4 - Excluir cliente\n");
-    printf("5 - Realizar um pedido\n"); //conferir
-    printf("6 - Voltar\n");
+    printf("3 - Realizar um pedido\n"); //conferir
+    printf("4 - Voltar\n");
     printf("Insira a opcao desejada:.......");
     scanf("%d", &opcao);
 
     return opcao;
 };
+
+int menuCadastros(){
+
+    int opcao;
+    system(LIMPAR);
+    printf("===================================== Menu de Cadastros =====================================\n");
+    printf("1 - Cadastrar cliente\n");
+    printf("2 - Editar cliente\n");
+    printf("3 - Excluir cliente\n"); 
+    printf("4 - Voltar\n");  
+     printf("Insira a opcao desejada:.......");
+    scanf("%d", &opcao);
+
+    return opcao; 
+
+}
+
+void switchCadastros(int opcao, Cliente **clientes, int *numCLiente){
+
+    switch(opcao){
+
+        case 1:
+            *clientes = cadastroClientes(*clientes, numCLiente);
+            break;
+
+        case 2:
+        //editarcliente
+            break;
+
+        case 3:
+            *clientes = excluirCliente(*clientes, numCLiente);
+            break;
+
+        case 4:
+            return;
+            break;
+
+        default:
+            printf("Opcao invalida! Tente novamente.\n");
+
+    }
+    
+}
 
 int menuEstoque()
 {
@@ -274,15 +331,88 @@ int menuEstoque()
     int opcao;
     system(LIMPAR);
     printf("===================================== Menu de Estoque =====================================\n");
-    printf("1 - Cadastrar produto\n");
-    printf("2 - Pesquisar produto\n");//conferir
-    printf("3 - Excluir produto\n");//conferir
-    printf("4 - Inserir no estoque\n");//conferir
-    printf("5 - Vizualizar estoque\n");
-    printf("6 - Voltar\n");
+    printf("1 - Cadastros\n");
+    printf("2 - Vizualizar estoque\n");
+    printf("3 - Voltar\n");
     printf("Insira a opcao desejada:.......");
     scanf("%d", &opcao);
     return opcao;
+}
+
+void switchVizuEstoque(int opcao, Produto **produto, int *numProduto){
+
+    switch(opcao){
+
+        case 1:
+            listarProdutos(*produto, *numProduto);
+            break;
+
+        case 2:
+            buscarProduto(*produto, *numProduto);
+            break;
+
+        case 3:
+            return;
+            break;
+
+        default:
+            printf("Opcao invalida! Tente novamente\n");
+        }
+
+}
+
+void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto){
+
+    switch(opcao){
+
+        case 1:
+            *produto = cadastroProdutos(*produto, numProduto);
+            break;
+
+        case 2:
+            *produto = excluiProduto(*produto, numProduto);
+            break;
+
+        case 3:
+            inserirEstoque(*produto, *numProduto);
+            break;
+
+        case 4:
+            return;
+            break;
+
+        default:
+            printf("Opcao invalida! Tente novamente\n");
+    }
+    
+}
+
+int menuVizuEstoque(){
+    
+    int opcao;
+    system(LIMPAR);
+    printf("===================================== Menu de Estoque =====================================\n");
+    printf("1 - Listar Produtos\n");
+    printf("2 - Pesquisar por produto\n");
+    printf("3 - Voltar\n");
+    printf("Insira a opcao desejada:.......");
+    scanf("%d", &opcao);
+    return opcao;
+}
+
+int menuCadastroEstoque(){
+
+    int opcao;
+    system(LIMPAR);
+    printf("===================================== Cadastro Estoque =====================================\n");
+    printf("1 - Cadastrar produto\n");
+    printf("2 - Excluir produto\n");
+    printf("3 - Editar no estoque\n");
+    printf("4 - Voltar\n");
+    printf("Insira a opcao desejada:.......");
+    scanf("%d", &opcao);
+    return opcao;
+
 }
 
 void encerraPrograma()
@@ -295,6 +425,7 @@ void encerraPrograma()
 Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
 {
     system(LIMPAR);
+    int i;
     printf("===================================== Cadatrar Cliente =======================================\n");
     (*numCliente)++;
     clientes = (Cliente *)realloc(clientes, (*numCliente) * sizeof(Cliente));
@@ -309,6 +440,15 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
     scanf(" %50[^\n]", novoCliente->nome);
     printf("Digite o CPF: ");
     scanf(" %11s", novoCliente->cpf);
+    for(i =0; i<clientes; i++){
+
+        if(clientes[i].cpf == novoCliente->cpf){
+
+            printf("CPF já cadastrado!\n");
+            return;
+        }
+
+    }
     printf("Digite o telefone: ");
     scanf(" %14s", novoCliente->telefone);
     printf("Digite o endereço: ");
@@ -317,6 +457,8 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
     scanf(" %49s", novoCliente->email);
 
     fileCliente(novoCliente);
+
+    printf("Cliente cadastrado com sucesso!\n");
 
     return clientes;
 }
@@ -340,6 +482,44 @@ void fileCliente(Cliente *cliente)
     }
 }
 
+int menuListar(){
+
+    int opcao;
+    system(LIMPAR);
+    printf("===================================== Listar Clientes =====================================\n");
+    printf("1 - Exibir todos clientes\n");
+    printf("2 - Buscar cliente por CPF\n");
+    printf("3 - Voltar\n");
+    printf("Insira a opcao desejada:.......");
+    scanf("%d", &opcao);
+
+    return opcao;
+
+}
+
+void switchListar(int opcao, Cliente **clientes, int *numCLiente){
+
+    switch(opcao){
+
+        case 1:
+            listaTodosClientes(*clientes, *numCLiente);
+            break;
+
+        case 2:
+            buscaCLiente(*clientes, *numCLiente);
+            break;
+
+        case 3:
+            return;
+            break;
+
+        default:
+            printf("Opcao invalida! Tente novamente.\n");
+
+    }
+
+}
+
 Produto *cadastroProdutos(Produto *produto, int *numProduto)
 {
     system(LIMPAR);
@@ -352,7 +532,8 @@ Produto *cadastroProdutos(Produto *produto, int *numProduto)
         exit(1);
     }
     Produto *novoProduto = &produto[*numProduto - 1];
-
+    
+    int i;
     printf("Digite o codigo do produto: ");
     scanf("%d", &novoProduto->codigo);
     getchar();
@@ -366,7 +547,7 @@ Produto *cadastroProdutos(Produto *produto, int *numProduto)
     scanf("%d", &novoProduto->quantidade);
 
     fileEstoque(novoProduto);
-
+    
     return produto;
 }
 
@@ -436,7 +617,7 @@ Cliente *excluirCliente(Cliente *clientes, int *numCliente)
                     exit(1);
                 }
 
-                excluirClienteFile( cpfExcluir);
+                excluirClienteFile(cpfExcluir);
                 printf("Cliente excluido com sucesso.\n");
             }
             else
@@ -714,7 +895,7 @@ void buscaCLiente(Cliente *clientes, int numClientes){
     }
     if (!clienteEncontrado)
     {
-        printf("Cliente com CPF %d nao encontrado.\n", cpfBusca);
+        printf("Cliente com CPF %s nao encontrado.\n", cpfBusca);
     }
 
 }
@@ -724,9 +905,8 @@ void inserirEstoque(Produto *produto, int numProduto)
 
 {
     system(LIMPAR);
-    int codProduto, qtdAdicionar, i, escolherAltercao;
+    int codProduto,i;
     bool prodEncontrado = false;
-    float vCustoAlterar, vVendaAlterar;
 
     printf("========================================== Alterar ===========================================\n");
     printf("Digite o codigo do produto pra alterar ao estoque: ");
@@ -745,65 +925,14 @@ void inserirEstoque(Produto *produto, int numProduto)
             printf("Valor de Custo: %.2f\n", produto[i].valorDeCusto);
             printf("Valor de Venda: %.2f\n", produto[i].valorDeVenda);
 
+            int alteracao;
+
             do
             {
-                printf("\n========================================== Alterar ===========================================\n");
-                printf("[1] - Inserir Quantidade no Estoque\n");
-                printf("[2] - Alterar Valor de Custo\n");
-                printf("[3] - Alterar Valor de Venda\n");
-                printf("[4] - Voltar\n");
-                printf("Digite a opção que deseja alterar:....... ");
-                scanf("%d", &escolherAltercao);
+                alteracao = menuAlterarEstoque();
+                switchAlteracao(alteracao,produto,numProduto);
 
-                switch (escolherAltercao)
-                {
-                case 1:
-                    printf("Digite a quantidade a ser adicionada: ");
-                    scanf("%d", &qtdAdicionar);
-                    if (qtdAdicionar > 0)
-                    {
-                        produto[i].quantidade += qtdAdicionar;
-                        printf("Nova quantidade em estoque do produto '%s' (Codigo: %d): %d\n", produto[i].nome, produto[i].codigo, produto[i].quantidade);
-                    }
-                    else
-                    {
-                        printf("Quantidade invalida! A quantidade a ser adicionada deve ser maior que zero.\n");
-                    }
-                    break;
-                case 2:
-                    printf("Digite o valor a ser alterado: ");
-                    scanf("%f", &vCustoAlterar);
-                    if (vCustoAlterar > 0)
-                    {
-                        produto[i].valorDeCusto = vCustoAlterar;
-                        printf("Novo valor de custo do produto '%s' (Codigo: %d): %.2f\n", produto[i].nome, produto[i].codigo, produto[i].valorDeCusto);
-                    }
-                    else
-                    {
-                        printf("Valor invalido! O valor deve ser maior que zero.\n");
-                    }
-                    break;
-                case 3:
-                    printf("Digite o valor a ser alterado: ");
-                    scanf("%f", &vVendaAlterar);
-                    if (vVendaAlterar > 0)
-                    {
-                        produto[i].valorDeVenda = vVendaAlterar;
-                        printf("Novo valor de venda do produto '%s' (Codigo: %d): %.2f\n", produto[i].nome, produto[i].codigo, produto[i].valorDeVenda);
-                    }
-                    else
-                    {
-                        printf("Valor invalido! O valor deve ser maior que zero.\n");
-                    }
-                    break;
-                case 4:
-                    return;
-                    break;
-                default:
-                    printf("Opcao invalida! Tente novamente\n");
-                    break;
-                }
-            } while (escolherAltercao != 4);
+            } while (alteracao != 4);
 
             break;
         }
@@ -815,3 +944,228 @@ void inserirEstoque(Produto *produto, int numProduto)
     }
 }
 
+int menuAlterarEstoque(){
+
+    int escolherAltercao;
+    printf("\n========================================== Alterar ===========================================\n");
+    printf("[1] - Inserir Quantidade no Estoque\n");
+    printf("[2] - Alterar Valor de Custo\n");
+    printf("[3] - Alterar Valor de Venda\n");
+    printf("[4] - Voltar\n");
+    printf("Digite a opção que deseja alterar:....... ");
+    scanf("%d", &escolherAltercao);
+    return escolherAltercao;
+}
+
+void switchAlteracao(int alteracao, Produto *produto, int numProduto){
+
+    switch (alteracao)
+    {
+        case 1:
+            alteraQTD(produto, numProduto);
+            break;
+
+        case 2:
+            alteraValorCusto(produto,numProduto); 
+            break;
+        case 3:
+            alteraValorVenda(produto,numProduto);  
+            break;
+        case 4:
+            return;
+            break;
+        default:
+            printf("Opcao invalida! Tente novamente\n");
+            break;
+        }
+
+}
+
+void alteraValorVenda(Produto *produto, int numProdutos){
+
+    int i;
+    float vVendaAlterar;
+
+    printf("Digite o valor a ser alterado: ");
+    scanf("%f", &vVendaAlterar);
+    if (vVendaAlterar > 0)
+    {
+        produto[i].valorDeVenda = vVendaAlterar;
+        printf("Novo valor de venda do produto '%s' (Codigo: %d): %.2f\n", produto[i].nome, produto[i].codigo, produto[i].valorDeVenda);
+        atualizarEstoqueFile(produto, numProdutos);
+    }
+    else
+    {
+        printf("Valor invalido! O valor deve ser maior que zero.\n");
+    }
+}
+void alteraValorCusto(Produto *produto, int numProdutos){
+    
+    int i;
+    float vCustoAlterar; 
+    printf("Digite o valor a ser alterado: ");
+    scanf("%f", &vCustoAlterar);
+    if (vCustoAlterar > 0)
+    {
+        produto[i].valorDeCusto = vCustoAlterar;
+        printf("Novo valor de custo do produto '%s' (Codigo: %d): %.2f\n", produto[i].nome, produto[i].codigo, produto[i].valorDeCusto);
+        atualizarEstoqueFile(produto,numProdutos);
+    }
+    else
+    {
+        printf("Valor invalido! O valor deve ser maior que zero.\n");
+    }
+}
+
+void alteraQTD(Produto *produto, int numProdutos){
+
+    int qtdAdicionar,i;
+    printf("Digite a quantidade a ser adicionada: ");
+    scanf("%d", &qtdAdicionar);
+    if (qtdAdicionar > 0)
+        {
+            produto[i].quantidade += qtdAdicionar;
+            printf("Nova quantidade em estoque do produto '%s' (Codigo: %d): %d\n", produto[i].nome, produto[i].codigo, produto[i].quantidade);
+            atualizarEstoqueFile(produto,numProdutos);
+        }
+        else
+        {
+            printf("Quantidade invalida! A quantidade a ser adicionada deve ser maior que zero.\n");
+        }
+}
+
+void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos)
+{
+    char cpf[12];
+    int codigoProduto, quantidadeNova, i, j;
+    bool clienteEncontrado = false, produtoEncontrado = false;
+    float valorGasto;
+
+    printf("Digite o CPF do cliente: ");
+    scanf("%s", cpf);
+
+    for (i = 0; i < numClientes; i++)
+    {
+        if (strcmp(clientes[i].cpf, cpf) == 0)
+        {
+            printf("Cliente encontrado: %s\n", clientes[i].nome);
+            clienteEncontrado = true;
+            break;
+        }
+    }
+
+    if (!clienteEncontrado)
+    {
+        printf("Cliente não encontrado!\n");
+        return;
+    }
+
+    printf("Digite o código do produto: ");
+    scanf("%d", &codigoProduto);
+
+    for (j = 0; j < numProdutos; j++)
+    {   
+        if (produtos[j].codigo == codigoProduto)
+        {
+            if(produtos[j].quantidade ==0){
+
+                printf("Produto sem estoque!\n");
+                return;
+
+            }else{
+                printf("\n----------------------------------------------------\n");
+                printf("\nProduto: %s\nQuantidade em estoque: %d\nValor: %.2f\n", produtos[j].nome, produtos[j].quantidade, produtos[j].valorDeVenda);
+                produtoEncontrado = true;
+                break;
+            }
+        }
+    }
+
+    if (!produtoEncontrado)
+    {
+        printf("Produto não encontrado!\n");
+        return;
+    }
+
+    printf("\n----------------------------------------------------\n");
+    printf("Digite a quantidade desejada: ");
+    scanf("%d", &quantidadeNova);
+
+    if (produtos[j].quantidade < quantidadeNova)
+    {
+        printf("Estoque insuficiente!\n");
+        return;
+    }
+
+    char resposta;
+    printf("\n----------------------------------------------------\n");
+    printf("Valor do pedido: %.2f\nConfirmar? (S/N)\n", produtos[j].valorDeVenda*quantidadeNova);
+    scanf(" %c",&resposta);
+
+    if(resposta == 'S' || resposta == 's'){
+
+        produtos[j].quantidade -= quantidadeNova;
+        valorGasto = produtos[j].valorDeVenda * quantidadeNova;
+
+        printf("Pedido realizado com sucesso! Total: R$ %.2f\n", valorGasto);
+
+        atualizarEstoqueFile(produtos, numProdutos);
+        salvarPedidoNoArquivo(*clientes, produtos, &quantidadeNova, numProdutos, valorGasto);
+        return;
+
+    }else{
+
+        printf("Pedido cancelado!\n");
+        return;
+
+    }
+
+}
+
+void atualizarEstoqueFile(Produto *produtos, int numProdutos)
+{
+    FILE *arquivoProduto = fopen("Estoque.txt", "w"); // modo "w" para sobrescrever
+
+    if (arquivoProduto != NULL)
+    {
+        for (int i = 0; i < numProdutos; i++)
+        {
+            fprintf(arquivoProduto, "Codigo: %d, Nome do produto: %s, Valor de custo: %.2f, Valor de Venda: %.2f, Quantidade: %d\n",
+                    produtos[i].codigo, produtos[i].nome, produtos[i].valorDeCusto, produtos[i].valorDeVenda, produtos[i].quantidade);
+        }
+        fclose(arquivoProduto);
+    }
+    else
+    {
+        printf("Erro ao abrir arquivo para atualização do estoque!\n");
+        exit(SAIR);
+    }
+}
+
+void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido)
+{
+    FILE *arquivoPedido = fopen("Pedidos.txt", "a+");
+    if (arquivoPedido == NULL)
+    {
+        printf("Erro ao abrir arquivo de pedidos!\n");
+        return;
+    }
+
+    fprintf(arquivoPedido, "Cliente: %s, CPF: %s, Total do Pedido: %.2f\n", cliente.nome, cliente.cpf, totalPedido);
+    fprintf(arquivoPedido, "Produtos Comprados:\n");
+
+    for (int i = 0; i < numProdutos; i++)
+    {
+        fprintf(arquivoPedido, "- Produto: %s, Codigo: %d, Quantidade: %d, Preço Unitário: %.2f, Total: %.2f\n",
+                produtosComprados[i].nome,
+                produtosComprados[i].codigo,
+                quantidades[i],
+                produtosComprados[i].valorDeVenda,
+                produtosComprados[i].valorDeVenda * quantidades[i]);
+    }
+
+    fprintf(arquivoPedido, "---------------------------------------\n");
+    fclose(arquivoPedido);
+
+    printf("Pedido salvo com sucesso no arquivo!\n");
+}
