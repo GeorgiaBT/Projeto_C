@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
 /*
 O que fazer:
 criar a funcao editar cliente (so vai permitir editar telefone, email e endereco ja q ngm muda de nome nem cpf)
@@ -37,18 +38,18 @@ typedef struct
 } Cliente;
 
 //funções base
-int menuOpcoes();
+int menuOpcoes(); //melhorei layout
 void switchMenuInicial(int opcaoCE, Produto **produto, Cliente **clientes,int *numProdutos,int *numClientes);
-int menuClientes();
-int menuEstoque();
-void encerraPrograma();
-Cliente *lerArquivoClientes(Cliente *clientes, int *numCliente);
-Produto *lerArquivoProdutos(Produto *produtos, int *numProdutos);
+int menuClientes();//melhorei layout
+int menuEstoque();//melhorei layout
+void encerraPrograma(); //verificada
+void lerArquivoClientes(Cliente **clientes, int *numCliente); //atualizei
+void lerArquivoProdutos(Produto **produtos, int *numProdutos); //atualizei
 
 //funções clientes
 void switchCliente(int opcao, Cliente **clientes, int *numCliente,Produto **produto, int *numProduto);
-int menuCadastros();
-int menuListar();
+int menuCadastros();//melhorei layout
+int menuListar(); //melhorei layout
 void switchCadastros(int opcao, Cliente **clientes, int *numCLiente);
 void switchListar(int opcao, Cliente **clientes, int *numCLiente);
 Cliente *cadastroClientes(Cliente *clientes, int *numCliente);
@@ -60,6 +61,14 @@ void buscaCLiente(Cliente *clientes, int numClientes);
 void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos);
 void atualizarEstoqueFile(Produto *produtos, int numProdutos);
 void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido, int codigoComprado);
+int menuAlterarCliente(); //melhorei layout
+void editarCliente(Cliente *clientes, int numClientes);
+void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClientes);
+void alteraTelefone(Cliente *clientes, int i, int numClientes);
+void alteraEmail(Cliente *clientes, int i, int numClientes);
+void alteraEndereco(Cliente *clientes, int i, int numClientes);
+void atualizarClienteFile(Cliente *clientes, int numClientes);
+
 
 //funções produtos
 void switchEstoque(int opcao, Produto **produto, int *numProduto);
@@ -69,14 +78,14 @@ void listarProdutos(Produto *produto, int numProduto);
 Produto *excluiProduto(Produto *produto, int *numProduto);
 void excluirProdutoFile(int codigoExcluir);
 void buscarProduto(Produto *produto, int numProduto);
-int menuAlterarEstoque();
+int menuAlterarEstoque(); //melhorei layout
 void switchAlteracao(int alteracao, Produto *produto, int numProduto,int i);
 void inserirEstoque(Produto *produto, int numProduto);
 void alteraValorVenda(Produto *produto, int numProdutos, int i);
 void alteraQTD(Produto *produto, int numProdutos, int i);
 void alteraValorCusto(Produto *produto, int numProdutos, int i);
-int menuCadastroEstoque();
-int menuVizuEstoque();
+int menuCadastroEstoque();  //melhorei layout
+int menuVizuEstoque(); //melhorei layout
 void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto);
 void switchVizuEstoque(int opcao, Produto **produto, int *numProduto);
 
@@ -86,8 +95,8 @@ int main()
     Cliente *clientes = NULL;
     Produto *produto = NULL;
     
-    clientes = lerArquivoClientes(clientes, &numClientes);
-    produto = lerArquivoProdutos(produto, &numProdutos);
+    lerArquivoClientes(&clientes, &numClientes);
+    lerArquivoProdutos(&produto, &numProdutos);
 
     do
     {
@@ -100,7 +109,6 @@ int main()
 
     return 0;
 }
-
 
 void switchMenuInicial(int opcaoCE, Produto **produto, Cliente **clientes,int *numProdutos,int *numClientes){
 
@@ -148,11 +156,11 @@ void switchCliente(int opcao, Cliente **clientes, int *numCliente,Produto **prod
     case 1:
 
         do
-            {
-                opcaoMenu = menuCadastros();
-                switchCadastros(opcaoMenu, clientes, numCliente);
+        {
+            opcaoMenu = menuCadastros();
+            switchCadastros(opcaoMenu, clientes, numCliente);
 
-            } while (opcaoMenu < 1 || opcaoMenu > 4);
+        } while (opcaoMenu < 1 || opcaoMenu > 4);
 
         break;
 
@@ -213,63 +221,63 @@ void switchEstoque(int opcao, Produto **produto, int *numProduto)
     }
 }
 
-Produto *lerArquivoProdutos(Produto *produtos, int *numProdutos){
+void lerArquivoProdutos(Produto **produtos, int *numProdutos){
     FILE *arquivoProduto = fopen("Estoque.txt", "r");
     if (arquivoProduto == NULL) {
         printf("Erro ao abrir o arquivo de produtos!\n");
-        return produtos;
+        return;
     }
 
     Produto produtoTemp;
     while (fscanf(arquivoProduto, "Codigo: %d, Nome do produto: %50[^,], Valor de custo: %f, Valor de Venda: %f, Quantidade: %d\n",&produtoTemp.codigo, produtoTemp.nome, &produtoTemp.valorDeCusto,&produtoTemp.valorDeVenda, &produtoTemp.quantidade) == 5)
     {
         (*numProdutos)++;
-        produtos = realloc(produtos, (*numProdutos) * sizeof(Produto));
-        if (produtos == NULL) {
+        *produtos = realloc(*produtos, (*numProdutos) * sizeof(Produto));
+        if (*produtos == NULL) {
             printf("Erro ao alocar memória\n");
             exit(1);
         }
-        produtos[*numProdutos - 1] = produtoTemp;
+        (*produtos)[*numProdutos - 1] = produtoTemp;
     }
 
     fclose(arquivoProduto);
-    return produtos;
+
 }
 
-Cliente *lerArquivoClientes(Cliente *clientes, int *numCliente){
+void lerArquivoClientes(Cliente **clientes, int *numCliente){
     FILE *arquivoCliente = fopen("Clientes.txt", "r");
     if (arquivoCliente == NULL) {
         printf("Erro ao abrir o arquivo de clientes!\n");
-        return clientes;
+        return;
     }
 
     Cliente clienteTemp;
-    while (fscanf(arquivoCliente, "Nome: %50[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %49[^\n]\n",
-                  clienteTemp.nome, clienteTemp.cpf, clienteTemp.telefone,
-                  clienteTemp.endereco, clienteTemp.email) == 5)
+    while (fscanf(arquivoCliente, "Nome: %50[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %49[^\n]\n",clienteTemp.nome, clienteTemp.cpf, clienteTemp.telefone,clienteTemp.endereco, clienteTemp.email) == 5)
     {
         (*numCliente)++;
-        clientes = realloc(clientes, (*numCliente) * sizeof(Cliente));
-        if (clientes == NULL) {
+        *clientes = realloc(*clientes, (*numCliente) * sizeof(Cliente));
+        if (*clientes == NULL) {
             printf("Erro ao alocar memória\n");
             exit(1);
         }
-        clientes[*numCliente - 1] = clienteTemp;
+        (*clientes)[*numCliente - 1] = clienteTemp;
     }
 
     fclose(arquivoCliente);
-    return clientes;
+    
 }
 
 int menuOpcoes()
 {
-
     int opcao;
-    printf("===================================== MENU =======================================\n");
+    printf("=====================================\n");
+    printf("                MENU                 \n");
+    printf("=====================================\n");
     printf("1 - Clientes\n");
     printf("2 - Estoque\n");
     printf("3 - Sair\n");
-    printf("Insira a opcao que deseja acessar:.......");
+    printf("=====================================\n");
+    printf("Insira a opcao que deseja acessar: ");
     scanf("%d", &opcao);
 
     return opcao;
@@ -278,31 +286,36 @@ int menuOpcoes()
 int menuClientes()
 {
     int opcao;
-    system(LIMPAR);
-    printf("===================================== Menu de Cliente =====================================\n");
+    system(LIMPAR); 
+    printf("=====================================\n");
+    printf("           Menu de Cliente           \n");
+    printf("=====================================\n");
     printf("1 - Cadastros\n");
     printf("2 - Listar clientes\n");
-    printf("3 - Realizar um pedido\n"); //conferir
+    printf("3 - Realizar um pedido\n");
     printf("4 - Voltar\n");
-    printf("Insira a opcao desejada:.......");
+    printf("=====================================\n");
+    printf("Insira a opcao desejada: ");
     scanf("%d", &opcao);
-
     return opcao;
-};
+}
 
 int menuCadastros(){
 
     int opcao;
-    system(LIMPAR);
-    printf("===================================== Menu de Cadastros =====================================\n");
+    system(LIMPAR); 
+    printf("=====================================\n");
+    printf("          Menu de Cadastros          \n");
+    printf("=====================================\n");
     printf("1 - Cadastrar cliente\n");
     printf("2 - Editar cliente\n");
-    printf("3 - Excluir cliente\n"); 
-    printf("4 - Voltar\n");  
-     printf("Insira a opcao desejada:.......");
+    printf("3 - Excluir cliente\n");
+    printf("4 - Voltar\n");
+    printf("=====================================\n");
+    printf("Insira a opcao desejada: ");
     scanf("%d", &opcao);
 
-    return opcao; 
+    return opcao;
 
 }
 
@@ -315,7 +328,7 @@ void switchCadastros(int opcao, Cliente **clientes, int *numCLiente){
             break;
 
         case 2:
-        //editarcliente
+            editarCliente(*clientes,*numCLiente);
             break;
 
         case 3:
@@ -337,13 +350,17 @@ int menuEstoque()
 {
 
     int opcao;
-    system(LIMPAR);
-    printf("===================================== Menu de Estoque =====================================\n");
+    system(LIMPAR); 
+    printf("=====================================\n");
+    printf("           Menu de Estoque           \n");
+    printf("=====================================\n");
     printf("1 - Cadastros\n");
-    printf("2 - Vizualizar estoque\n");
+    printf("2 - Visualizar estoque\n");
     printf("3 - Voltar\n");
-    printf("Insira a opcao desejada:.......");
+    printf("=====================================\n");
+    printf("Insira a opcao desejada: ");
     scanf("%d", &opcao);
+
     return opcao;
 }
 
@@ -399,11 +416,14 @@ int menuVizuEstoque(){
     
     int opcao;
     system(LIMPAR);
-    printf("===================================== Menu de Estoque =====================================\n");
+    printf("=====================================\n");
+    printf("           Menu de Estoque           \n");
+    printf("=====================================\n");
     printf("1 - Listar Produtos\n");
     printf("2 - Pesquisar por produto\n");
     printf("3 - Voltar\n");
-    printf("Insira a opcao desejada:.......");
+    printf("=====================================\n");
+    printf("Insira a opcao desejada: ");
     scanf("%d", &opcao);
     return opcao;
 }
@@ -412,12 +432,15 @@ int menuCadastroEstoque(){
 
     int opcao;
     system(LIMPAR);
-    printf("===================================== Cadastro Estoque =====================================\n");
+    printf("=====================================\n");
+    printf("         Cadastro de Estoque         \n");
+    printf("=====================================\n");
     printf("1 - Cadastrar produto\n");
     printf("2 - Excluir produto\n");
     printf("3 - Editar no estoque\n");
     printf("4 - Voltar\n");
-    printf("Insira a opcao desejada:.......");
+    printf("=====================================\n");
+    printf("Insira a opcao desejada: ");
     scanf("%d", &opcao);
     return opcao;
 
@@ -435,6 +458,25 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
     system(LIMPAR);
     int i;
     printf("===================================== Cadatrar Cliente =======================================\n");
+    
+    char cpfTemp[12];
+
+    
+    printf("Digite o nome do cliente: ");
+    scanf(" %50[^\n]", clientes[*numCliente].nome);
+    printf("Digite o CPF: ");
+    scanf(" %11s", cpfTemp);
+    
+    for(i =0; i<*numCliente; i++){
+
+        if(strcmp(clientes[i].cpf, cpfTemp) ==0){
+
+            printf("CPF já cadastrado!\n");
+            return clientes;
+        }
+
+    }
+
     (*numCliente)++;
     clientes = (Cliente *)realloc(clientes, (*numCliente) * sizeof(Cliente));
     if (clientes == NULL)
@@ -443,20 +485,7 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
         exit(1);
     }
     Cliente *novoCliente = &clientes[*numCliente - 1];
-
-    printf("Digite o nome do cliente: ");
-    scanf(" %50[^\n]", novoCliente->nome);
-    printf("Digite o CPF: ");
-    scanf(" %11s", novoCliente->cpf);
-    for(i =0; i<*numCliente; i++){
-
-        if(clientes[i].cpf == novoCliente->cpf){
-
-            printf("CPF já cadastrado!\n");
-
-        }
-
-    }
+    strcpy(novoCliente->cpf, cpfTemp);
     printf("Digite o telefone: ");
     scanf(" %14s", novoCliente->telefone);
     printf("Digite o endereço: ");
@@ -494,11 +523,14 @@ int menuListar(){
 
     int opcao;
     system(LIMPAR);
-    printf("===================================== Listar Clientes =====================================\n");
+    printf("=====================================\n");
+    printf("           Listar Clientes           \n");
+    printf("=====================================\n");
     printf("1 - Exibir todos clientes\n");
     printf("2 - Buscar cliente por CPF\n");
     printf("3 - Voltar\n");
-    printf("Insira a opcao desejada:.......");
+    printf("=====================================\n");
+    printf("Insira a opcao desejada: ");
     scanf("%d", &opcao);
 
     return opcao;
@@ -532,6 +564,22 @@ Produto *cadastroProdutos(Produto *produto, int *numProduto)
 {
     system(LIMPAR);
     printf("===================================== Cadastrar Produto =======================================\n");
+    
+    int codigoTemp;
+    printf("Digite o codigo do produto: ");
+    scanf("%d", &codigoTemp);
+
+    for(int i =0; i<*numProduto;i++){
+
+        if(codigoTemp == produto[i].codigo){
+
+            printf("Código já cadastrado!\n");
+            return produto;
+
+        }
+
+    }
+
     (*numProduto)++;
     produto = (Produto *)realloc(produto, (*numProduto) * sizeof(Produto));
     if (produto == NULL)
@@ -540,19 +588,8 @@ Produto *cadastroProdutos(Produto *produto, int *numProduto)
         exit(1);
     }
     Produto *novoProduto = &produto[*numProduto - 1];
+    novoProduto->codigo = codigoTemp;
     
-    printf("Digite o codigo do produto: ");
-    scanf("%d", &novoProduto->codigo);
-   for(int i =0; i<numProduto;i++){
-
-        if(novoProduto->codigo == produto[i].codigo){
-
-            printf("Código já cadastrado!\n");
-            return;
-
-        }
-
-   }
     getchar();
     printf("Digite o nome do produto: ");
     scanf("%51[^\n]", novoProduto->nome);
@@ -965,12 +1002,15 @@ void inserirEstoque(Produto *produto, int numProduto)
 int menuAlterarEstoque(){
 
     int escolherAltercao;
-    printf("\n========================================== Alterar ===========================================\n");
-    printf("[1] - Inserir Quantidade no Estoque\n");
-    printf("[2] - Alterar Valor de Custo\n");
-    printf("[3] - Alterar Valor de Venda\n");
-    printf("[4] - Voltar\n");
-    printf("Digite a opção que deseja alterar:....... ");
+    printf("==========================================\n");
+    printf("                Alterar                   \n");
+    printf("==========================================\n");
+    printf("1 - Inserir Quantidade no Estoque\n");
+    printf("2 - Alterar Valor de Custo\n");
+    printf("3 - Alterar Valor de Venda\n");
+    printf("4 - Voltar\n");
+    printf("==========================================\n");
+    printf("Digite a opção que deseja alterar: ");
     scanf("%d", &escolherAltercao);
     return escolherAltercao;
 }
@@ -1189,4 +1229,131 @@ void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *qua
     fclose(arquivoPedido);
 
     printf("Pedido salvo com sucesso no arquivo!\n");
+}
+
+void editarCliente(Cliente *clientes, int numClientes)
+{
+    system(LIMPAR);
+    char cpf[12];
+    bool clienteEncontrado = false;
+
+    printf("========================================== Editar Cliente ===========================================\n");
+    printf("Digite o CPF do cliente para editar (somente números): ");
+    scanf("%s", cpf);
+    system(LIMPAR);
+
+    for (int i = 0; i < numClientes; i++)
+    {
+        if (strcmp(clientes[i].cpf, cpf) == 0)
+        {
+            clienteEncontrado = true;
+            printf("\nCliente encontrado:\n");
+            printf("Nome: %s\n", clientes[i].nome);
+            printf("CPF: %s\n", clientes[i].cpf);
+            printf("Telefone atual: %s\n", clientes[i].telefone);
+            printf("Email atual: %s\n", clientes[i].email);
+            printf("Endereço atual: %s\n", clientes[i].endereco);
+
+            int alteracao;
+            do
+            {
+                alteracao = menuAlterarCliente();
+                switchAlteracaoCliente(alteracao, clientes, i, numClientes);
+
+            } while (alteracao != 4);
+            break;
+        }
+    }
+
+    if (!clienteEncontrado)
+    {
+        printf("Cliente com CPF %s não encontrado.\n", cpf);
+    }
+}
+
+int menuAlterarCliente()
+{
+    int escolherAlteracao;
+   printf("==========================================\n");
+    printf("           Alterar Cliente                \n");
+    printf("==========================================\n");
+    printf("1 - Alterar Telefone\n");
+    printf("2 - Alterar Email\n");
+    printf("3 - Alterar Endereço\n");
+    printf("4 - Voltar\n");
+    printf("==========================================\n");
+    printf("Digite a opção que deseja alterar: ");
+    scanf("%d", &escolherAlteracao);
+    return escolherAlteracao;
+}
+
+void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClientes)
+{
+    switch (alteracao)
+    {
+    case 1:
+        alteraTelefone(clientes, i, numClientes);
+        break;
+    case 2:
+        alteraEmail(clientes, i, numClientes);
+        break;
+    case 3:
+        alteraEndereco(clientes, i, numClientes);
+        break;
+    case 4:
+        return;
+        break;
+    default:
+        printf("Opção inválida! Tente novamente.\n");
+        break;
+    }
+}
+
+void alteraTelefone(Cliente *clientes, int i, int numClientes)
+{
+    char novoTelefone[15];
+    printf("Digite o novo telefone: ");
+    scanf("%s", novoTelefone);
+    strcpy(clientes[i].telefone, novoTelefone);
+    printf("Telefone atualizado para %s.\n", clientes[i].telefone);
+    atualizarClienteFile(clientes, numClientes);
+}
+
+void alteraEmail(Cliente *clientes, int i, int numClientes)
+{
+    char novoEmail[50];
+    printf("Digite o novo email: ");
+    scanf("%s", novoEmail);
+    strcpy(clientes[i].email, novoEmail);
+    printf("Email atualizado para %s.\n", clientes[i].email);
+    atualizarClienteFile(clientes, numClientes);
+}
+
+void alteraEndereco(Cliente *clientes, int i, int numClientes)
+{
+    char novoEndereco[100];
+    printf("Digite o novo endereço: ");
+    scanf(" %[^\n]s", novoEndereco);
+    strcpy(clientes[i].endereco, novoEndereco);
+    printf("Endereço atualizado para %s.\n", clientes[i].endereco);
+    atualizarClienteFile(clientes, numClientes);
+}
+
+void atualizarClienteFile(Cliente *clientes, int numClientes)
+{
+    FILE *arquivoCliente = fopen("Clientes.txt", "w"); 
+    if (arquivoCliente != NULL)
+    {
+        for (int i = 0; i < numClientes; i++)
+        {
+            fprintf(arquivoCliente, "Nome: %s, CPF: %s, Telefone: %s, Endereco: %s, Email: %s\n",
+                    clientes[i].nome, clientes[i].cpf, clientes[i].telefone, clientes[i].endereco, clientes[i].email);
+        }
+        fclose(arquivoCliente);
+    }
+    else
+    {
+        printf("Erro ao abrir arquivo para atualização dos clientes!\n");
+        exit(SAIR);
+    }
 }
