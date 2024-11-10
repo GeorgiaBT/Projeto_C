@@ -4,9 +4,6 @@
 #include <stdbool.h>
 
 /*
-O que fazer:
-criar a funcao editar cliente (so vai permitir editar telefone, email e endereco ja q ngm muda de nome nem cpf)
-
 Rever o codigo:
     -EM todos os lugares que for possivel, vamos alocar memoria
     -Onde estiver usando vetor sem ponteiro vamos fazer de ponteiro
@@ -52,12 +49,12 @@ int menuCadastros();//melhorei layout
 int menuListar(); //melhorei layout
 void switchCadastros(int opcao, Cliente **clientes, int *numCLiente);
 void switchListar(int opcao, Cliente **clientes, int *numCLiente);
-Cliente *cadastroClientes(Cliente *clientes, int *numCliente);
-void fileCliente(Cliente *cliente);
-Cliente *excluirCliente(Cliente *clientes, int *numCliente);
-void excluirClienteFile(char *cpfExcluir );
-void listaTodosClientes(Cliente *clientes, int numClientes);
-void buscaCLiente(Cliente *clientes, int numClientes);
+Cliente *cadastroClientes(Cliente *clientes, int *numCliente); //verificada
+void fileCliente(Cliente *cliente); //verificada
+Cliente *excluirCliente(Cliente *clientes, int *numCliente);//atualizei
+void excluirClienteFile(char *cpfExcluir ); //atualizei
+void listaTodosClientes(Cliente *clientes, int numClientes); //atualizei
+void buscaCLiente(Cliente *clientes, int numClientes); //atualizei
 void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos);
 void atualizarEstoqueFile(Produto *produtos, int numProdutos);
 void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido, int codigoComprado);
@@ -72,10 +69,10 @@ void atualizarClienteFile(Cliente *clientes, int numClientes);
 
 //funções produtos
 void switchEstoque(int opcao, Produto **produto, int *numProduto);
-Produto *cadastroProdutos(Produto *produto, int *numProduto);
+Produto *cadastroProdutos(Produto *produto, int *numProduto); //verificada
 void fileEstoque(Produto *produto);
 void listarProdutos(Produto *produto, int numProduto);
-Produto *excluiProduto(Produto *produto, int *numProduto);
+void excluiProduto(Produto **produto, int *numProduto);
 void excluirProdutoFile(int codigoExcluir);
 void buscarProduto(Produto *produto, int numProduto);
 int menuAlterarEstoque(); //melhorei layout
@@ -395,7 +392,7 @@ void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto){
             break;
 
         case 2:
-            *produto = excluiProduto(*produto, numProduto);
+            excluiProduto(produto, numProduto);
             break;
 
         case 3:
@@ -635,32 +632,34 @@ Cliente *excluirCliente(Cliente *clientes, int *numCliente)
 
     char cpfExcluir[12];
     bool clienteEncontrado = false;
-    int i, j;
     char confirmar;
 
     printf("Digite o CPF do cliente a ser excluido: ");
     scanf("%s", cpfExcluir);
     system(LIMPAR);
 
-    for (i = 0; i < *numCliente; i++)
+    Cliente *cliente;
+    for (cliente = clientes; cliente < clientes + *numCliente; cliente++)
     {
-        if (strcmp(clientes[i].cpf, cpfExcluir) == 0)
+        if (strcmp(cliente->cpf, cpfExcluir) == 0)
         {
             clienteEncontrado = true;
 
             printf("\nCliente encontrado:\n");
-            printf("Nome: %s\nCPF: %s\nTelefone: %s\n", clientes[i].nome, clientes[i].cpf, clientes[i].telefone);
-            printf("Email: %s\nEndereco: %s\n", clientes[i].email, clientes[i].endereco);
+            printf("Nome: %s\nCPF: %s\nTelefone: %s\n", cliente->nome, cliente->cpf, cliente->telefone);
+            printf("Email: %s\nEndereco: %s\n", cliente->email, cliente->endereco);
 
             printf("Confirma que deseja excluir este cliente? (S/N): ");
             scanf(" %c", &confirmar);
 
             if (confirmar == 's' || confirmar == 'S')
             {
-                for (j = i; j < *numCliente - 1; j++)
+                Cliente *proximoCliente = cliente + 1;
+                while (proximoCliente < clientes + *numCliente)
                 {
-                    clientes[j] = clientes[j + 1];
-                    
+                    *cliente = *proximoCliente;
+                    cliente++;
+                    proximoCliente++;
                 }
                 (*numCliente)--;
 
@@ -700,23 +699,29 @@ void excluirClienteFile(char *cpfExcluir) {
         exit(1);
     }
     
-    char linha[300];  // Buffer para armazenar cada linha
+    char linha[300];  
     bool clienteEncontrado = false;
 
     while (fgets(linha, sizeof(linha), arquivoOriginal) != NULL) {
-        // Verifica se a linha atual contém o CPF do cliente a ser excluído
-        if (strstr(linha, cpfExcluir) != NULL) {
+      
+        char nome[100], cpf[12], telefone[15], endereco[100], email[100];
+
+        int camposLidos = sscanf(linha, "Nome: %99[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %99[^\n]", nome, cpf, telefone, endereco, email);
+
+
+        if (camposLidos == 5 && strcmp(cpf, cpfExcluir) == 0)
+        {
             clienteEncontrado = true;
-            // Ignora esta linha, pois é o cliente que queremos excluir
-        } else {
-            fputs(linha, arquivoTemp);  // Copia a linha para o arquivo temporário
+            continue;
         }
-    }
+
+            fputs(linha, arquivoTemp);  
+        }
+    
 
     fclose(arquivoOriginal);
     fclose(arquivoTemp);
 
-    // Remove o arquivo original e renomeia o temporário
     remove("Clientes.txt");
     rename("Clientes_temp.txt", "Clientes.txt");
 
@@ -752,35 +757,37 @@ void listarProdutos(Produto *produto, int numProduto)
 void listaTodosClientes(Cliente *clientes, int numClientes)
 {
     system(LIMPAR);
-    printf("===================================== Lista do Clientes Cadastrados =======================================\n");
+    printf("===================================== Lista de Clientes Cadastrados ======================================\n");
 
-    int i;
     if (numClientes == 0)
     {
-        printf("Nao ha clientes cadastrados.\n");
+        printf("\nNenhum cliente cadastrado no momento.\n");
         return;
     }
 
-    for (i = 0; i < numClientes; i++)
+    Cliente *clienteAtual;
+    int i = 1;
+    for (clienteAtual = clientes; clienteAtual < clientes + numClientes; clienteAtual++)
     {
-        printf("Cliente %d:\n", i + 1);
-        printf("Nome: %s\n", clientes[i].nome);
-        printf("CPF: %s\n", clientes[i].cpf);
-        printf("Endereco: %s\n", clientes[i].endereco);
-        printf("Telefone: %s\n", clientes[i].telefone);
-        printf("Email: %s\n", clientes[i].email);
-        printf("-------------------------\n");
+        printf("\n========================== Cliente %d ==========================\n", i);
+        printf("\nNome:      %-40s\n", clienteAtual->nome);
+        printf("CPF:       %-40s\n", clienteAtual->cpf);
+        printf("Endereco:  %-40s\n", clienteAtual->endereco);
+        printf("Telefone:  %-40s\n", clienteAtual->telefone);
+        printf("Email:     %-40s\n", clienteAtual->email);
+        printf("-------------------------------------------------------------\n");
+        i++;
     }
 }
 
-Produto *excluiProduto(Produto *produto, int *numProduto)
+void excluiProduto(Produto **produto, int *numProduto)
 {
     system(LIMPAR);
     printf("========================================== Excluir Produto ===========================================\n\n");
     if (*numProduto == 0)
     {
         printf("Nao ha produtos cadastrados.\n");
-        return produto;
+        return;
     }
 
     int codigoExcluir, i, j;
@@ -793,13 +800,13 @@ Produto *excluiProduto(Produto *produto, int *numProduto)
 
     for (i = 0; i < *numProduto; i++)
     {
-        if (produto[i].codigo == codigoExcluir)
+        if ((*produto)[i].codigo == codigoExcluir)
         {
             produtoEncontrado = true;
 
             printf("\nProduto encontrado:\n");
-            printf("Codigo: %d\nNome: %s\nQuantidade: %d\n", produto[i].codigo, produto[i].nome, produto[i].quantidade);
-            printf("Valor de Custo: %.2f\nValor de Venda: %.2f\n", produto[i].valorDeCusto, produto[i].valorDeVenda);
+            printf("Codigo: %d\nNome: %s\nQuantidade: %d\n", (*produto)[i].codigo, (*produto)[i].nome, (*produto)[i].quantidade);
+            printf("Valor de Custo: %.2f\nValor de Venda: %.2f\n", (*produto)[i].valorDeCusto, (*produto)[i].valorDeVenda);
 
             printf("Confirma que deseja excluir este produto? (S/N): ");
             scanf(" %c", &confirmar);
@@ -808,12 +815,12 @@ Produto *excluiProduto(Produto *produto, int *numProduto)
             {
                 for (j = i; j < *numProduto - 1; j++)
                 {
-                    produto[j] = produto[j + 1];
+                    (*produto)[j] = (*produto)[j + 1];
                 }
                 (*numProduto)--;
 
-                produto = realloc(produto, (*numProduto) * sizeof(Produto));
-                if (produto == NULL && *numProduto > 0)
+                *produto = realloc(*produto, (*numProduto) * sizeof(Produto));
+                if (*produto == NULL && *numProduto > 0)
                 {
                     printf("Erro ao realocar memoria.\n");
                     exit(1);
@@ -832,8 +839,6 @@ Produto *excluiProduto(Produto *produto, int *numProduto)
     {
         printf("Produto com codigo %d nao encontrado.\n", codigoExcluir);
     }
-
-    return produto;
 }
 
 void excluirProdutoFile(int codigoExcluir)
@@ -923,25 +928,25 @@ void buscarProduto(Produto *produto, int numProduto)
 
 void buscaCLiente(Cliente *clientes, int numClientes){
 
-    int i;
+    Cliente *clienteAtual;
     bool clienteEncontrado = false;
     char cpfBusca[11];
 
     printf("Digite o CPF do cliente a ser buscado: ");
     scanf("%11s", cpfBusca);
 
-    for (i = 0; i < numClientes; i++)
+    for (clienteAtual = clientes; clienteAtual < clientes + numClientes; clienteAtual++)
     {
-        if (strcmp(clientes[i].cpf, cpfBusca) == 0)
+        if (strcmp(clienteAtual->cpf, cpfBusca) == 0)
         {
             clienteEncontrado = true;
 
             printf("\n---Cliente encontrado---\n");
-            printf("Nome: %s\n", clientes[i].nome);
-            printf("CPF: %s\n", clientes[i].cpf);
-            printf("Telefone: %s\n", clientes[i].telefone);
-            printf("Endereco: %s\n", clientes[i].endereco);
-            printf("Email: %s\n", clientes[i].email);
+            printf("Nome: %s\n", clienteAtual->nome);
+            printf("CPF: %s\n", clienteAtual->cpf);
+            printf("Telefone: %s\n", clienteAtual->telefone);
+            printf("Endereco: %s\n", clienteAtual->endereco);
+            printf("Email: %s\n", clienteAtual->email);
             printf("-------------------------\n");
 
             break;
