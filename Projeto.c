@@ -3,13 +3,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-/*
-Rever o codigo:
-    -EM todos os lugares que for possivel, vamos alocar memoria
-    -Onde estiver usando vetor sem ponteiro vamos fazer de ponteiro
-*/
-
-
 #define SAIR 0
 #define LIMPAR "cls"
 
@@ -35,57 +28,60 @@ typedef struct
 } Cliente;
 
 //funções base
-int menuOpcoes(); //melhorei layout
+void lerArquivoClientes(Cliente **clientes, int *numCliente); 
+void lerArquivoProdutos(Produto **produtos, int *numProdutos); 
+//Menus iniciais
+int menuOpcoes(); 
 void switchMenuInicial(int opcaoCE, Produto **produto, Cliente **clientes,int *numProdutos,int *numClientes);
-int menuClientes();//melhorei layout
-int menuEstoque();//melhorei layout
-void encerraPrograma(); //verificada
-void lerArquivoClientes(Cliente **clientes, int *numCliente); //atualizei
-void lerArquivoProdutos(Produto **produtos, int *numProdutos); //atualizei
-
-//funções clientes
+void encerraPrograma();
+int menuClientes();
+int menuEstoque();
 void switchCliente(int opcao, Cliente **clientes, int *numCliente,Produto **produto, int *numProduto);
-int menuCadastros();//melhorei layout
-int menuListar(); //melhorei layout
+void switchEstoque(int opcao, Produto **produto, int *numProduto);
+//Menu cadastros clientes
+int menuCadastros();
 void switchCadastros(int opcao, Cliente **clientes, int *numCLiente);
-void switchListar(int opcao, Cliente **clientes, int *numCLiente);
-Cliente *cadastroClientes(Cliente *clientes, int *numCliente); //verificada
-void fileCliente(Cliente *cliente); //verificada
-Cliente *excluirCliente(Cliente *clientes, int *numCliente);//atualizei
-void excluirClienteFile(char *cpfExcluir ); //atualizei
-void listaTodosClientes(Cliente *clientes, int numClientes); //atualizei
-void buscaCLiente(Cliente *clientes, int numClientes); //atualizei
-void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos);
-void atualizarEstoqueFile(Produto *produtos, int numProdutos);
-void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido, int codigoComprado);
-int menuAlterarCliente(); //melhorei layout
+Cliente *cadastroClientes(Cliente *clientes, int *numCliente); 
+void fileCliente(Cliente *cliente); 
+Cliente *excluirCliente(Cliente *clientes, int *numCliente);
+void excluirClienteFile(char *cpfExcluir ); 
 void editarCliente(Cliente *clientes, int numClientes);
+//Menu editar cliente
+int menuAlterarCliente(); 
 void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClientes);
 void alteraTelefone(Cliente *clientes, int i, int numClientes);
 void alteraEmail(Cliente *clientes, int i, int numClientes);
 void alteraEndereco(Cliente *clientes, int i, int numClientes);
 void atualizarClienteFile(Cliente *clientes, int numClientes);
-
-
-//funções produtos
-void switchEstoque(int opcao, Produto **produto, int *numProduto);
-Produto *cadastroProdutos(Produto *produto, int *numProduto); //verificada
+//Menu Listar clientes
+int menuListar(); 
+void switchListar(int opcao, Cliente **clientes, int *numCLiente);
+void listaTodosClientes(Cliente *clientes, int numClientes); 
+void buscaCLiente(Cliente *clientes, int numClientes); 
+//Realizar pedido
+void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos);
+void atualizarEstoqueFile(Produto *produtos, int numProdutos);
+void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int quantidades, int numProdutos, float totalPedido, int codigoComprado);
+//Menu cadastros produtos
+int menuCadastroEstoque(); 
+void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto);
+Produto *cadastroProdutos(Produto *produto, int *numProduto); 
 void fileEstoque(Produto *produto);
-void listarProdutos(Produto *produto, int numProduto);
-void excluiProduto(Produto **produto, int *numProduto);
+void excluiProduto(Produto *produto, int *numProduto);
 void excluirProdutoFile(int codigoExcluir);
+//Menu listar estoque
+int menuVizuEstoque(); 
+void switchVizuEstoque(int opcao, Produto **produto, int *numProduto);
+void listarProdutos(Produto *produto, int numProduto);
 void buscarProduto(Produto *produto, int numProduto);
-int menuAlterarEstoque(); //melhorei layout
+//Menu alterar estoque
+int menuAlterarEstoque(); 
 void switchAlteracao(int alteracao, Produto *produto, int numProduto,int i);
 void inserirEstoque(Produto *produto, int numProduto);
 void alteraValorVenda(Produto *produto, int numProdutos, int i);
 void alteraQTD(Produto *produto, int numProdutos, int i);
 void alteraValorCusto(Produto *produto, int numProdutos, int i);
-int menuCadastroEstoque();  //melhorei layout
-int menuVizuEstoque(); //melhorei layout
-void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto);
-void switchVizuEstoque(int opcao, Produto **produto, int *numProduto);
-
+ 
 int main()
 {
     int opcaoCE, numProdutos = 0, numClientes=0;
@@ -392,7 +388,7 @@ void switchCadastroEstoque(int opcao, Produto **produto, int *numProduto){
             break;
 
         case 2:
-            excluiProduto(produto, numProduto);
+            excluiProduto(*produto, numProduto);
             break;
 
         case 3:
@@ -453,36 +449,38 @@ void encerraPrograma()
 Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
 {
     system(LIMPAR);
-    int i;
-    printf("===================================== Cadatrar Cliente =======================================\n");
-    
+    printf("===================================== Cadastrar Cliente =======================================\n");
+
     char cpfTemp[12];
-
-    
-    printf("Digite o nome do cliente: ");
-    scanf(" %50[^\n]", clientes[*numCliente].nome);
-    printf("Digite o CPF: ");
-    scanf(" %11s", cpfTemp);
-    
-    for(i =0; i<*numCliente; i++){
-
-        if(strcmp(clientes[i].cpf, cpfTemp) ==0){
-
-            printf("CPF já cadastrado!\n");
-            return clientes;
-        }
-
-    }
 
     (*numCliente)++;
     clientes = (Cliente *)realloc(clientes, (*numCliente) * sizeof(Cliente));
     if (clientes == NULL)
     {
-        printf("Erro alocacao\n");
+        printf("Erro de alocação\n");
         exit(1);
     }
+
+
     Cliente *novoCliente = &clientes[*numCliente - 1];
+
+    printf("Digite o CPF: ");
+    scanf(" %11s", cpfTemp);
+
+    for (int i = 0; i < *numCliente - 1; i++)  
+    {
+        if (strcmp(clientes[i].cpf, cpfTemp) == 0)
+        {
+            printf("CPF já cadastrado!\n");
+            (*numCliente)--;  
+            clientes = (Cliente *)realloc(clientes, (*numCliente) * sizeof(Cliente));
+            return clientes;
+        }
+    }
+
     strcpy(novoCliente->cpf, cpfTemp);
+    printf("Digite o nome do cliente: ");
+    scanf(" %50[^\n]", novoCliente->nome);
     printf("Digite o telefone: ");
     scanf(" %14s", novoCliente->telefone);
     printf("Digite o endereço: ");
@@ -742,15 +740,18 @@ void listarProdutos(Produto *produto, int numProduto)
         return;
     }
 
-    for (int i = 0; i < numProduto; i++)
+    Produto *produtoAtual;
+    int i =1;
+    for (produtoAtual = produto; produtoAtual <produto + numProduto; produtoAtual++)
     {
-        printf("Produto %d:\n", i + 1);
-        printf("Codigo: %d\n", produto[i].codigo);
-        printf("Nome: %s\n", produto[i].nome);
-        printf("Quantidade: %d\n", produto[i].quantidade);
-        printf("Valor de Custo: %.2f\n", produto[i].valorDeCusto);
-        printf("Valor de Venda: %.2f\n", produto[i].valorDeVenda);
+        printf("Produto %d:\n", i);
+        printf("Codigo: %d\n", produtoAtual->codigo);
+        printf("Nome: %s\n", produtoAtual->nome);
+        printf("Quantidade: %d\n", produtoAtual->quantidade);
+        printf("Valor de Custo: %.2f\n", produtoAtual->valorDeCusto);
+        printf("Valor de Venda: %.2f\n", produtoAtual->valorDeVenda);
         printf("-------------------------\n");
+        i++;
     }
 }
 
@@ -780,7 +781,7 @@ void listaTodosClientes(Cliente *clientes, int numClientes)
     }
 }
 
-void excluiProduto(Produto **produto, int *numProduto)
+void excluiProduto(Produto *produto, int *numProduto)
 {
     system(LIMPAR);
     printf("========================================== Excluir Produto ===========================================\n\n");
@@ -790,7 +791,7 @@ void excluiProduto(Produto **produto, int *numProduto)
         return;
     }
 
-    int codigoExcluir, i, j;
+    int codigoExcluir;
     bool produtoEncontrado = false;
     char confirmar;
 
@@ -798,29 +799,33 @@ void excluiProduto(Produto **produto, int *numProduto)
     scanf("%d", &codigoExcluir);
     system(LIMPAR);
 
-    for (i = 0; i < *numProduto; i++)
+    Produto *produtos;
+    for (produtos = produto; produtos < produto + *numProduto; produtos++)
     {
-        if ((*produto)[i].codigo == codigoExcluir)
+        if (produtos->codigo == codigoExcluir) 
         {
             produtoEncontrado = true;
 
             printf("\nProduto encontrado:\n");
-            printf("Codigo: %d\nNome: %s\nQuantidade: %d\n", (*produto)[i].codigo, (*produto)[i].nome, (*produto)[i].quantidade);
-            printf("Valor de Custo: %.2f\nValor de Venda: %.2f\n", (*produto)[i].valorDeCusto, (*produto)[i].valorDeVenda);
+            printf("Codigo: %d\nNome: %s\nQuantidade: %d\n", produtos->codigo, produtos->nome, produtos->quantidade);
+            printf("Valor de Custo: %.2f\nValor de Venda: %.2f\n", produtos->valorDeCusto, produtos->valorDeVenda);
 
             printf("Confirma que deseja excluir este produto? (S/N): ");
             scanf(" %c", &confirmar);
 
             if (confirmar == 's' || confirmar == 'S')
             {
-                for (j = i; j < *numProduto - 1; j++)
+                Produto *proximoProduto = produtos + 1;
+                while (proximoProduto < produto + *numProduto)
                 {
-                    (*produto)[j] = (*produto)[j + 1];
+                    *produtos = *proximoProduto;
+                    produtos++;
+                    proximoProduto++;
                 }
                 (*numProduto)--;
 
-                *produto = realloc(*produto, (*numProduto) * sizeof(Produto));
-                if (*produto == NULL && *numProduto > 0)
+                produto = realloc(produto, (*numProduto) * sizeof(Produto));
+                if (produto == NULL && *numProduto > 0)
                 {
                     printf("Erro ao realocar memoria.\n");
                     exit(1);
@@ -960,8 +965,6 @@ void buscaCLiente(Cliente *clientes, int numClientes){
 }
 
 void inserirEstoque(Produto *produto, int numProduto)
-
-
 {
     system(LIMPAR);
     int codProduto,i;
@@ -1171,7 +1174,7 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
         printf("Pedido realizado com sucesso! Total: R$ %.2f\n", valorGasto);
 
         atualizarEstoqueFile(produtos, numProdutos);
-        salvarPedidoNoArquivo(*clientes, produtos, &quantidadeNova, numProdutos, valorGasto,codigoProduto);
+        salvarPedidoNoArquivo(*clientes, produtos, quantidadeNova, numProdutos, valorGasto,codigoProduto);
         return;
 
     }else{
@@ -1185,7 +1188,7 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
 
 void atualizarEstoqueFile(Produto *produtos, int numProdutos)
 {
-    FILE *arquivoProduto = fopen("Estoque.txt", "w"); // modo "w" para sobrescrever
+    FILE *arquivoProduto = fopen("Estoque.txt", "w"); 
 
     if (arquivoProduto != NULL)
     {
@@ -1203,7 +1206,7 @@ void atualizarEstoqueFile(Produto *produtos, int numProdutos)
     }
 }
 
-void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *quantidades, int numProdutos, float totalPedido, int codigoComprado)
+void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int quantidades, int numProdutos, float totalPedido, int codigoComprado)
 {
     FILE *arquivoPedido = fopen("Pedidos.txt", "a+");
     if (arquivoPedido == NULL)
@@ -1222,9 +1225,9 @@ void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int *qua
             fprintf(arquivoPedido, "- Produto: %s, Codigo: %d, Quantidade: %d, Preço Unitário: %.2f, Total: %.2f\n",
                 produtosComprados[i].nome,
                 produtosComprados[i].codigo,
-                quantidades[i],
+                quantidades,
                 produtosComprados[i].valorDeVenda,
-                produtosComprados[i].valorDeVenda * quantidades[i]);
+                produtosComprados[i].valorDeVenda * quantidades);
 
         }
 
