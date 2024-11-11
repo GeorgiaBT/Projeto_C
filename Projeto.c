@@ -482,8 +482,8 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
 
     printf("Digite o CPF: ");
     scanf(" %11s", cpfTemp);
-
-    for (int i = 0; i < *numCliente - 1; i++)  
+    int i;
+    for (i = 0; i < *numCliente - 1; i++)  
     {
         if (strcmp(clientes[i].cpf, cpfTemp) == 0)
         {
@@ -576,11 +576,11 @@ Produto *cadastroProdutos(Produto *produto, int *numProduto)
     system(LIMPAR);
     printf("===================================== Cadastrar Produto =======================================\n");
     
-    int codigoTemp;
+    int codigoTemp, i;
     printf("Digite o codigo do produto: ");
     scanf("%d", &codigoTemp);
 
-    for(int i =0; i<*numProduto;i++){
+    for(i =0; i<*numProduto;i++){
 
         if(codigoTemp == produto[i].codigo){
 
@@ -1190,7 +1190,7 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
         printf("Pedido realizado com sucesso! Total: R$ %.2f\n", valorGasto);
 
         atualizarEstoqueFile(produtos, numProdutos);
-        salvarPedidoNoArquivo(*clientes, produtos, quantidadeNova, numProdutos, valorGasto,codigoProduto);
+        salvarPedidoNoArquivo(clientes[i], &produtos[j], quantidadeNova, 1, valorGasto, codigoProduto);
         return;
 
     }else{
@@ -1205,10 +1205,10 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
 void atualizarEstoqueFile(Produto *produtos, int numProdutos)
 {
     FILE *arquivoProduto = fopen("Estoque.txt", "w"); 
-
+    int i;
     if (arquivoProduto != NULL)
     {
-        for (int i = 0; i < numProdutos; i++)
+        for (i = 0; i < numProdutos; i++)
         {
             fprintf(arquivoProduto, "Codigo: %d, Nome do produto: %s, Valor de custo: %.2f, Valor de Venda: %.2f, Quantidade: %d\n",
                     produtos[i].codigo, produtos[i].nome, produtos[i].valorDeCusto, produtos[i].valorDeVenda, produtos[i].quantidade);
@@ -1224,6 +1224,7 @@ void atualizarEstoqueFile(Produto *produtos, int numProdutos)
 
 void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int quantidades, int numProdutos, float totalPedido, int codigoComprado)
 {
+    int i;
     FILE *arquivoPedido = fopen("Pedidos.txt", "a+");
     if (arquivoPedido == NULL)
     {
@@ -1234,7 +1235,7 @@ void salvarPedidoNoArquivo(Cliente cliente, Produto *produtosComprados, int quan
     fprintf(arquivoPedido, "Cliente: %s, CPF: %s, Total do Pedido: %.2f\n", cliente.nome, cliente.cpf, totalPedido);
     fprintf(arquivoPedido, "Produtos Comprados:\n");
 
-    for (int i = 0; i < numProdutos; i++)
+    for (i = 0; i < numProdutos; i++)
     {
         if(produtosComprados[i].codigo == codigoComprado){
 
@@ -1260,13 +1261,14 @@ void editarCliente(Cliente *clientes, int numClientes)
     system(LIMPAR);
     char cpf[12];
     bool clienteEncontrado = false;
-
+    int i;
+    
     printf("========================================== Editar Cliente ===========================================\n");
     printf("Digite o CPF do cliente para editar (somente números): ");
     scanf("%s", cpf);
     system(LIMPAR);
 
-    for (int i = 0; i < numClientes; i++)
+    for (i = 0; i < numClientes; i++)
     {
         if (strcmp(clientes[i].cpf, cpf) == 0)
         {
@@ -1365,10 +1367,11 @@ void alteraEndereco(Cliente *clientes, int i, int numClientes)
 
 void atualizarClienteFile(Cliente *clientes, int numClientes)
 {
+    int i;
     FILE *arquivoCliente = fopen("Clientes.txt", "w"); 
     if (arquivoCliente != NULL)
     {
-        for (int i = 0; i < numClientes; i++)
+        for (i = 0; i < numClientes; i++)
         {
             fprintf(arquivoCliente, "Nome: %s, CPF: %s, Telefone: %s, Endereco: %s, Email: %s\n",
                     clientes[i].nome, clientes[i].cpf, clientes[i].telefone, clientes[i].endereco, clientes[i].email);
