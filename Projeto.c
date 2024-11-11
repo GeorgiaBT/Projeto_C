@@ -263,6 +263,16 @@ void lerArquivoClientes(Cliente **clientes, int *numCliente){
 int menuOpcoes()
 {
     int opcao;
+    printf("***********************************************************************************\n");
+    printf("*                                                                                 *\n");
+    printf("*   GGGGGGGGGG           SSSSSSS  TTTTTTTTTT    OOOOO     CCCCCCCC  KK    KK      *\n");
+    printf("*  GG                   SS            TT      OO     OO   CC        KK  KK        *\n");
+    printf("* GG            #####    SSSSSS       TT     OO       OO  CC        KKKK          *\n");
+    printf("* GG    GGGGGG                SS      TT     OO       OO  CC        KK  KK        *\n");
+    printf("*  GG       GG                SS      TT      OO     OO   CC        KK   KK       *\n");
+    printf("*   GGGGGGGGG           SSSSSSS       TT        OOOOO     CCCCCCCC  KK    KK      *\n");
+    printf("*                                                                                 *\n");
+    printf("***********************************************************************************\n");
     printf("=====================================\n");
     printf("                MENU                 \n");
     printf("=====================================\n");
