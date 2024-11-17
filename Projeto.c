@@ -58,6 +58,7 @@ int menuListar();
 void switchListar(int opcao, Cliente **clientes, int *numCLiente);
 void listaTodosClientes(Cliente *clientes, int numClientes); 
 void buscaCLiente(Cliente *clientes, int numClientes); 
+void quickClientes(Cliente clientes[], int incio, int fim);
 //Realizar pedido
 void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos);
 void atualizarEstoqueFile(Produto *produtos, int numProdutos);
@@ -90,6 +91,22 @@ int main()
     
     lerArquivoClientes(&clientes, &numClientes);
     lerArquivoProdutos(&produto, &numProdutos);
+
+    printf("*************************************************************************************************************\n");
+    printf("*                                                                                                           *\n");
+    printf("*   GGGGGGGGGGGGG         SSSSSSSSSSSS  TTTTTTTTTTTTTTTTT    OOOOOOOO         CCCCCCCCCCC  KKKK       KKKK  *\n");
+    printf("*  GGGGGGGGGGGGGGG      SSSSSSSSSSSSSSS  TTTTTTTTTTTTTTT   OOOOOOOOOOOO      CCCCCCCCCCCC  KKKK      KKKK   *\n");
+    printf("* GG                    SSSS                  TTTT        OOOO       OOOO   CCC            KKKK     KKKK    *\n");
+    printf("* GG                    SSSS                  TTTT       OOOO         OOOO  CCC            KKKK    KKKK     *\n");
+    printf("* GG                     SSSSSSSSSS           TTTT       OOOO         OOOO  CCC            KKKKKKKKKK       *\n");
+    printf("* GG   GGGGGGGGG           SSSSSSSSSSSS       TTTT       OOOO         OOOO  CCC            KKKKKKKKK        *\n");
+    printf("* GG        GGGGGG                  SSSS      TTTT       OOOO         OOOO  CCC            KKKK   KKKK      *\n");
+    printf("* GG           GGG                  SSSS      TTTT       OOOO         OOOO  CCC            KKKK    KKKK     *\n");
+    printf("*  GGG         GGG      SSSSSS      SSSS      TTTT        OOOO       OOOO   CCC            KKKK     KKKK    *\n");
+    printf("*   GGGGGGGGGGGGG       SSSSSSSSSSSSSSS       TTTT         OOOOOOOOOOOO      CCCCCCCCCCC   KKKK      KKKK   *\n");
+    printf("*    GGGGGGGGGG          SSSSSSSSSSSS         TTTT           OOOOOOOOO        CCCCCCCCCC   KKKK       KKKK  *\n");
+    printf("*                                                                                                           *\n");
+    printf("*************************************************************************************************************\n");
 
     do
     {
@@ -263,22 +280,7 @@ void lerArquivoClientes(Cliente **clientes, int *numCliente){
 int menuOpcoes()
 {
     int opcao;
-    printf("*************************************************************************************************************\n");
-    printf("*                                                                                                           *\n");
-    printf("*   GGGGGGGGGGGGG         SSSSSSSSSSSS  TTTTTTTTTTTTTTTTT    OOOOOOOO         CCCCCCCCCCC  KKKK       KKKK  *\n");
-    printf("*  GGGGGGGGGGGGGGG      SSSSSSSSSSSSSSS  TTTTTTTTTTTTTTT   OOOOOOOOOOOO      CCCCCCCCCCCC  KKKK      KKKK   *\n");
-    printf("* GG                    SSSS                  TTTT        OOOO       OOOO   CCC            KKKK     KKKK    *\n");
-    printf("* GG                    SSSS                  TTTT       OOOO         OOOO  CCC            KKKK    KKKK     *\n");
-    printf("* GG                     SSSSSSSSSS           TTTT       OOOO         OOOO  CCC            KKKKKKKKKK       *\n");
-    printf("* GG   GGGGGGGGG           SSSSSSSSSSSS       TTTT       OOOO         OOOO  CCC            KKKKKKKKK        *\n");
-    printf("* GG        GGGGGG                  SSSS      TTTT       OOOO         OOOO  CCC            KKKK   KKKK      *\n");
-    printf("* GG           GGG                  SSSS      TTTT       OOOO         OOOO  CCC            KKKK    KKKK     *\n");
-    printf("*  GGG         GGG      SSSSSS      SSSS      TTTT        OOOO       OOOO   CCC            KKKK     KKKK    *\n");
-    printf("*   GGGGGGGGGGGGG       SSSSSSSSSSSSSSS       TTTT         OOOOOOOOOOOO      CCCCCCCCCCC   KKKK      KKKK   *\n");
-    printf("*    GGGGGGGGGG          SSSSSSSSSSSS         TTTT           OOOOOOOOO        CCCCCCCCCC   KKKK       KKKK  *\n");
-    printf("*                                                                                                           *\n");
-    printf("*************************************************************************************************************\n");
-
+    
     printf("=====================================\n");
     printf("                MENU                 \n");
     printf("=====================================\n");
@@ -505,6 +507,7 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
     scanf(" %49s", novoCliente->email);
 
     fileCliente(novoCliente);
+    atualizarClienteFile(clientes, *numCliente);
 
     printf("Cliente cadastrado com sucesso!\n");
 
@@ -781,7 +784,9 @@ void listaTodosClientes(Cliente *clientes, int numClientes)
         printf("\nNenhum cliente cadastrado no momento.\n");
         return;
     }
-
+    
+    quickClientes(clientes, 0, numClientes - 1);
+    
     Cliente *clienteAtual;
     int i = 1;
     for (clienteAtual = clientes; clienteAtual < clientes + numClientes; clienteAtual++)
@@ -794,6 +799,36 @@ void listaTodosClientes(Cliente *clientes, int numClientes)
         printf("Email:     %-40s\n", clienteAtual->email);
         printf("-------------------------------------------------------------\n");
         i++;
+    }
+}
+
+void quickClientes(Cliente clientes[], int incio, int fim)
+{
+    int pivo = incio, i, j;
+    Cliente temp;
+
+    for (i = incio + 1; i <= fim; i++)
+    {
+        j = i;
+        if (strcmp(clientes[j].nome, clientes[pivo].nome) < 0)
+        {
+            temp = clientes[j];
+            while (j > pivo)
+            {
+                clientes[j] = clientes[j - 1];
+                j--;
+            }
+            clientes[j] = temp;
+            pivo++;
+        }
+    }
+    if (pivo - 1 >= incio)
+    {
+        quickClientes(clientes, incio, pivo - 1);
+    }
+    if (pivo + 1 <= fim)
+    {
+        quickClientes(clientes, pivo + 1, fim);
     }
 }
 
@@ -1367,6 +1402,7 @@ void alteraEndereco(Cliente *clientes, int i, int numClientes)
 
 void atualizarClienteFile(Cliente *clientes, int numClientes)
 {
+    quickClientes(clientes, 0, numClientes - 1);
     int i;
     FILE *arquivoCliente = fopen("Clientes.txt", "w"); 
     if (arquivoCliente != NULL)
