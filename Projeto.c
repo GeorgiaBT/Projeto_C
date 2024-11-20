@@ -75,6 +75,7 @@ int menuVizuEstoque();
 void switchVizuEstoque(int opcao, Produto **produto, int *numProduto);
 void listarProdutos(Produto *produto, int numProduto);
 void buscarProduto(Produto *produto, int numProduto);
+void quickProdutos(Produto produtos[], int incio, int fim);
 //Menu alterar estoque
 int menuAlterarEstoque(); 
 void switchAlteracao(int alteracao, Produto *produto, int numProduto,int i);
@@ -615,6 +616,7 @@ Produto *cadastroProdutos(Produto *produto, int *numProduto)
     scanf("%d", &novoProduto->quantidade);
 
     fileEstoque(novoProduto);
+    atualizarEstoqueFile(produto, *numProduto);
     
     return produto;
 }
@@ -759,6 +761,8 @@ void listarProdutos(Produto *produto, int numProduto)
         return;
     }
 
+    quickProdutos(produto, 0, numProduto - 1);
+
     Produto *produtoAtual;
     int i =1;
     for (produtoAtual = produto; produtoAtual <produto + numProduto; produtoAtual++)
@@ -831,6 +835,38 @@ void quickClientes(Cliente clientes[], int incio, int fim)
         quickClientes(clientes, pivo + 1, fim);
     }
 }
+
+void quickProdutos(Produto produtos[], int incio, int fim){
+
+   int pivo = incio, i, j;
+   Produto temp;
+   
+   for (i = incio + 1; i <= fim; i++)
+   {
+        j = i;
+        if (strcmp(produtos[j].nome, produtos[pivo].nome) < 0)
+        {
+            temp = produtos[j];
+            while (j > pivo)
+            {
+                produtos[j] = produtos[j - 1];
+                j--;
+            }
+            produtos[j] = temp;
+            pivo++;
+        }
+    }
+    if (pivo - 1 >= incio)
+    {
+        quickProdutos(produtos, incio, pivo - 1);
+    }
+    if (pivo + 1 <= fim)
+    {
+        quickProdutos(produtos, pivo + 1, fim);
+    }
+
+}
+
 
 void excluiProduto(Produto *produto, int *numProduto)
 {
@@ -1239,6 +1275,7 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
 
 void atualizarEstoqueFile(Produto *produtos, int numProdutos)
 {
+    quickProdutos(produtos, 0, numProdutos - 1);
     FILE *arquivoProduto = fopen("Estoque.txt", "w"); 
     int i;
     if (arquivoProduto != NULL)
