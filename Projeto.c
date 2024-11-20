@@ -24,7 +24,7 @@ typedef struct
     char telefone[15];
     char email[50];
     char endereco[100];
-    bool ativo;
+    char ativo[13];
 
 } Cliente;
 
@@ -53,6 +53,7 @@ void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClie
 void alteraTelefone(Cliente *clientes, int i, int numClientes);
 void alteraEmail(Cliente *clientes, int i, int numClientes);
 void alteraEndereco(Cliente *clientes, int i, int numClientes);
+void editarSituacao(Cliente *clientes, int i, int numClientes);
 void atualizarClienteFile(Cliente *clientes, int numClientes);
 // Menu Listar clientes
 int menuListar();
@@ -271,7 +272,7 @@ void lerArquivoClientes(Cliente **clientes, int *numCliente)
     }
 
     Cliente clienteTemp;
-    while (fscanf(arquivoCliente, "Nome: %50[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %49[^\n]\n", clienteTemp.nome, clienteTemp.cpf, clienteTemp.telefone, clienteTemp.endereco, clienteTemp.email) == 5)
+    while (fscanf(arquivoCliente, "Nome: %50[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %49[^,], Status: %13[^\n]\n", clienteTemp.nome, clienteTemp.cpf, clienteTemp.telefone, clienteTemp.endereco, clienteTemp.email, clienteTemp.ativo) == 6)
     {
         (*numCliente)++;
         *clientes = realloc(*clientes, (*numCliente) * sizeof(Cliente));
@@ -517,7 +518,7 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
     printf("Digite o email: ");
     scanf(" %49s", novoCliente->email);
 
-    novoCliente->ativo = true;
+    strcpy(novoCliente->ativo, "Ativo");
 
     fileCliente(novoCliente);
     atualizarClienteFile(clientes, *numCliente);
@@ -535,7 +536,7 @@ void fileCliente(Cliente *cliente)
     if (arquivoCliente != NULL)
     {
 
-        fprintf(arquivoCliente, "Nome: %s, CPF: %s, Telefone: %s, Endereco: %s, Email: %s Status: %s\n", cliente->nome, cliente->cpf, cliente->telefone, cliente->endereco, cliente->email, cliente->ativo ? "Ativo" : "Desabilitado");
+        fprintf(arquivoCliente, "Nome: %s, CPF: %s, Telefone: %s, Endereco: %s, Email: %s Status: %s\n", cliente->nome, cliente->cpf, cliente->telefone, cliente->endereco, cliente->email, cliente->ativo);
         fclose(arquivoCliente);
     }
     else
@@ -677,7 +678,7 @@ Cliente *excluirCliente(Cliente *clientes, int *numCliente)
 
             printf("\nCliente encontrado:\n");
             printf("Nome: %s\nCPF: %s\nTelefone: %s\n", cliente->nome, cliente->cpf, cliente->telefone);
-            printf("Email: %s\nEndereco: %s\n", cliente->email, cliente->endereco);
+            printf("Email: %s\nEndereco: %s\nStatus: %s\n", cliente->email, cliente->endereco, cliente->ativo);
 
             printf("Confirma que deseja excluir este cliente? (S/N): ");
             scanf(" %c", &confirmar);
@@ -737,11 +738,11 @@ void excluirClienteFile(char *cpfExcluir)
     while (fgets(linha, sizeof(linha), arquivoOriginal) != NULL)
     {
 
-        char nome[100], cpf[12], telefone[15], endereco[100], email[100];
+        char nome[100], cpf[12], telefone[15], endereco[100], email[100], ativo[13];
 
-        int camposLidos = sscanf(linha, "Nome: %99[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %99[^\n]", nome, cpf, telefone, endereco, email);
+        int camposLidos = sscanf(linha, "Nome: %99[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %99[^,], Status: %13[^\n]", nome, cpf, telefone, endereco, email,ativo);
 
-        if (camposLidos == 5 && strcmp(cpf, cpfExcluir) == 0)
+        if (camposLidos == 6 && strcmp(cpf, cpfExcluir) == 0)
         {
             clienteEncontrado = true;
             continue;
@@ -816,6 +817,7 @@ void listaTodosClientes(Cliente *clientes, int numClientes)
         printf("Endereco:  %-40s\n", clienteAtual->endereco);
         printf("Telefone:  %-40s\n", clienteAtual->telefone);
         printf("Email:     %-40s\n", clienteAtual->email);
+        printf("Status:     %-40s\n", clienteAtual->ativo);
         printf("-------------------------------------------------------------\n");
         i++;
     }
@@ -1053,6 +1055,7 @@ void buscaCLiente(Cliente *clientes, int numClientes)
             printf("Telefone: %s\n", clienteAtual->telefone);
             printf("Endereco: %s\n", clienteAtual->endereco);
             printf("Email: %s\n", clienteAtual->email);
+            printf("Status: %s\n", clienteAtual->ativo);
             printf("-------------------------\n");
 
             break;
@@ -1369,6 +1372,7 @@ void editarCliente(Cliente *clientes, int numClientes)
             printf("Telefone atual: %s\n", clientes[i].telefone);
             printf("Email atual: %s\n", clientes[i].email);
             printf("Endereço atual: %s\n", clientes[i].endereco);
+            printf("Status atual: %s\n", clientes[i].ativo);
 
             int alteracao;
             do
@@ -1376,7 +1380,7 @@ void editarCliente(Cliente *clientes, int numClientes)
                 alteracao = menuAlterarCliente();
                 switchAlteracaoCliente(alteracao, clientes, i, numClientes);
 
-            } while (alteracao != 4);
+            } while (alteracao != 5);
             break;
         }
     }
@@ -1404,13 +1408,61 @@ int menuAlterarCliente()
     return escolherAlteracao;
 }
 
+void editarSituacao(Cliente *clientes, int i, int numClientes){
+
+    char confirmar;
+
+    if(strcmp(clientes[i].ativo, "Ativo") ==0){
+
+        printf("Status do cliente: %s\n", clientes[i].ativo);
+        printf("Deseja inativar o cliente? (S / N)\n");
+        scanf(" %c", &confirmar);
+
+            if (confirmar == 's' || confirmar == 'S')
+            {
+                
+                strcpy(clientes[i].ativo, "Inativo");
+                atualizarClienteFile(clientes,numClientes);
+                printf("Cliente inativado com sucesso!\n");
+
+            }
+            else
+            {
+                printf("Operação cancelada.\n");
+            }
+
+    }else{
+
+        printf("Status do cliente: %s\n", clientes[i].ativo);
+        printf("Deseja reativar o cliente? (S / N)\n");
+        scanf(" %c", &confirmar);
+
+            if (confirmar == 's' || confirmar == 'S')
+            {
+                
+                strcpy(clientes[i].ativo, "Ativo");
+                atualizarClienteFile(clientes,numClientes);
+                printf("Cliente ativado com sucesso!\n");
+
+            }
+            else
+            {
+                printf("Operação cancelada.\n");
+            }
+
+    }
+
+}
+
 void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClientes)
-{
+{   
+
     switch (alteracao)
     {
 
     case 1:
-
+    
+        editarSituacao(clientes,i,numClientes);
         break;
 
     case 2:
@@ -1470,8 +1522,8 @@ void atualizarClienteFile(Cliente *clientes, int numClientes)
     {
         for (i = 0; i < numClientes; i++)
         {
-            fprintf(arquivoCliente, "Nome: %s, CPF: %s, Telefone: %s, Endereco: %s, Email: %s Status: %s\n",
-                    clientes[i].nome, clientes[i].cpf, clientes[i].telefone, clientes[i].endereco, clientes[i].email, clientes[i].ativo ? "Ativo" : "Desabilitado");
+            fprintf(arquivoCliente, "Nome: %s, CPF: %s, Telefone: %s, Endereco: %s, Email: %s, Status: %s\n",
+                    clientes[i].nome, clientes[i].cpf, clientes[i].telefone, clientes[i].endereco, clientes[i].email, clientes[i].ativo);
         }
         fclose(arquivoCliente);
     }
@@ -1482,38 +1534,3 @@ void atualizarClienteFile(Cliente *clientes, int numClientes)
     }
 }
 
-void desabilitarCliente(Cliente *clientes, int numClientes)
-{
-    char cpfTemp[12];
-    int i, encontrado = 0;
-
-    printf("Digite o CPF do cliente que deseja desabilitar: ");
-    scanf(" %11s", cpfTemp);
-
-    for (i = 0; i < numClientes; i++)
-    {
-        if (strcmp(clientes[i].cpf, cpfTemp) == 0)
-        {
-            if (!clientes[i].ativo)
-            {
-                printf("Cliente já está desabilitado.\n");
-            }
-            else
-            {
-                clientes[i].ativo = false;
-                printf("Cliente %s foi desabilitado com sucesso.\n", clientes[i].nome);
-            }
-            encontrado = 1;
-            break;
-        }
-    }
-
-    if (!encontrado)
-    {
-        printf("Cliente com CPF %s não encontrado.\n", cpfTemp);
-    }
-    else
-    {
-        atualizarClienteFile(clientes, numClientes);
-    }
-}
