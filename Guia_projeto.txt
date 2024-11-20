@@ -3,38 +3,21 @@ Software de Gestão de Inventário e Cadeia de Suprimentos: Ferramentas para o g
 Requisitos de Funcionalidade
 
 - A aplicação deve contar com as seguintes funcionalidades:
-    - Cadastrar um novo cliente com todas as particularidades que o ramo de atuação exigir;
-    - Listar todos os clientes de forma ordenada (numérica ou alfabética) a ser escolhida pelo operador;
-    - Consultar um cliente a partir do CPF cadastrado, listando todas suas informações, e sendo obrigatória a validação do CPF no momento do cadastro;
-    - Desativar um cliente;
-    - Excluir um cliente;
-    - Vender um serviço / realizar um pedido (a depender do tema abordado);
-    - Sair;
+    ✅ Cadastrar um novo cliente com todas as particularidades que o ramo de atuação exigir;
+    ✅ Listar todos os clientes de forma ordenada (numérica ou alfabética) a ser escolhida pelo operador;
+    ✅ Consultar um cliente a partir do CPF cadastrado, listando todas suas informações, e sendo obrigatória a validação do CPF no momento do cadastro;
+    ✅ Desativar um cliente;
+    ✅ Excluir um cliente;
+    ✅ Vender um serviço / realizar um pedido (a depender do tema abordado);
+    ✅ Sair;
 
 Regras de Desenvolvimento
 
-- A aplicação deve contar com os seguintes requisitos não funcionais:
+A aplicação deve contar com os seguintes requisitos não funcionais:
     ✅ A implementação de todo o projeto deve ser feita em linguagem C; 
-    - Todos os clientes / transações / serviços devem ser armazenados dentro de um arquivo do tipo `.txt`;
+    ✅ Todos os clientes / transações / serviços devem ser armazenados dentro de um arquivo do tipo `.txt`;
     ✅ O aplicativo deverá conter seu menu principal para a seleção das funcionalidades;
     ✅ Cada menu deve ser impresso a partir de uma subrotina independente;
-    - Toda a comunicação entre as subrotinas e o programa principal deverá ser via parâmetro (por valor ou referência). Somente as estruturas (struct), os protótipos das subrotinas podem ser declaradas fora da função `main` ou de outra subrotina. Naturalmente as bibliotecas e constantes (com `#define`) sempre são declaradas no início do programa antes da função `main`;
-    - Todas as estruturas devem ser alocadas dinamicamente, assim como qualquer vetor ou matriz de tipagem normal;
-    - Os métodos de busca e ordenação devem ser desenvolvidos dentro da aplicação;
---------------------------------------------------------------------------------------------------------------------
-    Menu seleciona estoque ou cliente
-    1. Menu Cliente
-        Cadastro de cliente (Nome, CPF, Telefone, Email, Endereco);
-        Consultar cliente (informações cadastradas + produtos comprados (qual produto, quantidade e valor gasto));
-        Excluir cliente (busca por cpf, opcao de confirmar ou cancelar)
-        Compra de produtos (Pede o cliente que vai realizar a compra e valida o cadastro com CPF>> Pede o produto/codigo do produto >> Pede a quantidade >> mostra o valor a ser gasto >> confirma/cancela >> atualiza o estoque)
-        Sair
-
-    2. Menu estoque
-        Cadastro de produtos (Nome, codigo, qtd, preco de custo e de venda)
-        Excluir produto (busca por codigo, opcao de confirmar ou cancelar)
-        Inserir no estoque
-        Vizualização do estoque 
-            -Por produto: nome, codigo, qtd em estoque e vendida, valor de custo e venda, valor total vendido e lucro;
-            -Total: qtd de cada produto disponivel, valor total vendido e valor total de lucro
-        Sair
+    ✅ Toda a comunicação entre as subrotinas e o programa principal deverá ser via parâmetro (por valor ou referência). Somente as estruturas (struct), os protótipos das subrotinas podem ser declaradas fora da função `main` ou de outra subrotina. Naturalmente as bibliotecas e constantes (com `#define`) sempre são declaradas no início do programa antes da função `main`;
+    ✅ Todas as estruturas devem ser alocadas dinamicamente, assim como qualquer vetor ou matriz de tipagem normal;
+    ✅ Os métodos de busca e ordenação devem ser desenvolvidos dentro da aplicação;
