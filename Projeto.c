@@ -740,7 +740,7 @@ void excluirClienteFile(char *cpfExcluir)
 
         char nome[100], cpf[12], telefone[15], endereco[100], email[100], ativo[13];
 
-        int camposLidos = sscanf(linha, "Nome: %99[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %99[^,], Status: %13[^\n]", nome, cpf, telefone, endereco, email,ativo);
+        int camposLidos = sscanf(linha, "Nome: %99[^,], CPF: %11[^,], Telefone: %14[^,], Endereco: %99[^,], Email: %99[^,], Status: %13[^\n]", nome, cpf, telefone, endereco, email, ativo);
 
         if (camposLidos == 6 && strcmp(cpf, cpfExcluir) == 0)
         {
@@ -1219,13 +1219,19 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
     {
         if (strcmp(clientes[i].cpf, cpf) == 0)
         {
-            printf("Cliente encontrado: %s\n", clientes[i].nome);
             clienteEncontrado = true;
-            break;
         }
+
+        if (strcmp(clientes[i].ativo, "Inativo") == 0)
+        {
+            printf("O cliente está inativo e não pode realizar pedidos.\n");
+            return;
+        }
+        printf("Cliente encontrado: %s\n", clientes[i].nome);
+        break;
     }
 
-    if (!clienteEncontrado)
+    if (clienteEncontrado == false)
     {
         printf("Cliente não encontrado!\n");
         return;
@@ -1408,61 +1414,60 @@ int menuAlterarCliente()
     return escolherAlteracao;
 }
 
-void editarSituacao(Cliente *clientes, int i, int numClientes){
+void editarSituacao(Cliente *clientes, int i, int numClientes)
+{
 
     char confirmar;
 
-    if(strcmp(clientes[i].ativo, "Ativo") ==0){
+    if (strcmp(clientes[i].ativo, "Ativo") == 0)
+    {
 
         printf("Status do cliente: %s\n", clientes[i].ativo);
         printf("Deseja inativar o cliente? (S / N)\n");
         scanf(" %c", &confirmar);
 
-            if (confirmar == 's' || confirmar == 'S')
-            {
-                
-                strcpy(clientes[i].ativo, "Inativo");
-                atualizarClienteFile(clientes,numClientes);
-                printf("Cliente inativado com sucesso!\n");
+        if (confirmar == 's' || confirmar == 'S')
+        {
 
-            }
-            else
-            {
-                printf("Operação cancelada.\n");
-            }
-
-    }else{
+            strcpy(clientes[i].ativo, "Inativo");
+            atualizarClienteFile(clientes, numClientes);
+            printf("Cliente inativado com sucesso!\n");
+        }
+        else
+        {
+            printf("Operação cancelada.\n");
+        }
+    }
+    else
+    {
 
         printf("Status do cliente: %s\n", clientes[i].ativo);
         printf("Deseja reativar o cliente? (S / N)\n");
         scanf(" %c", &confirmar);
 
-            if (confirmar == 's' || confirmar == 'S')
-            {
-                
-                strcpy(clientes[i].ativo, "Ativo");
-                atualizarClienteFile(clientes,numClientes);
-                printf("Cliente ativado com sucesso!\n");
+        if (confirmar == 's' || confirmar == 'S')
+        {
 
-            }
-            else
-            {
-                printf("Operação cancelada.\n");
-            }
-
+            strcpy(clientes[i].ativo, "Ativo");
+            atualizarClienteFile(clientes, numClientes);
+            printf("Cliente ativado com sucesso!\n");
+        }
+        else
+        {
+            printf("Operação cancelada.\n");
+        }
     }
-
 }
 
 void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClientes)
-{   
+{
 
     switch (alteracao)
     {
 
     case 1:
-    
-        editarSituacao(clientes,i,numClientes);
+
+        editarSituacao(clientes, i, numClientes);
         break;
 
     case 2:
@@ -1533,4 +1538,3 @@ void atualizarClienteFile(Cliente *clientes, int numClientes)
         exit(SAIR);
     }
 }
-
