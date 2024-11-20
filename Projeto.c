@@ -1372,13 +1372,14 @@ void editarCliente(Cliente *clientes, int numClientes)
 int menuAlterarCliente()
 {
     int escolherAlteracao;
-   printf("==========================================\n");
+    printf("==========================================\n");
     printf("           Alterar Cliente                \n");
     printf("==========================================\n");
-    printf("1 - Alterar Telefone\n");
-    printf("2 - Alterar Email\n");
-    printf("3 - Alterar Endereço\n");
-    printf("4 - Voltar\n");
+    printf("1 - Situação do Cadastro\n");
+    printf("2 - Alterar Telefone\n");
+    printf("3 - Alterar Email\n");
+    printf("4 - Alterar Endereço\n");
+    printf("5 - Voltar\n");
     printf("==========================================\n");
     printf("Digite a opção que deseja alterar: ");
     scanf("%d", &escolherAlteracao);
@@ -1389,16 +1390,21 @@ void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClie
 {
     switch (alteracao)
     {
+
     case 1:
+
+        break;
+
+    case 2:
         alteraTelefone(clientes, i, numClientes);
         break;
-    case 2:
+    case 3:
         alteraEmail(clientes, i, numClientes);
         break;
-    case 3:
+    case 4:
         alteraEndereco(clientes, i, numClientes);
         break;
-    case 4:
+    case 5:
         return;
         break;
     default:
@@ -1406,6 +1412,7 @@ void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClie
         break;
     }
 }
+
 
 void alteraTelefone(Cliente *clientes, int i, int numClientes)
 {
