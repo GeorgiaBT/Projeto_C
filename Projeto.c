@@ -1184,6 +1184,7 @@ void alteraValorVenda(Produto *produto, int numProdutos, int i)
         printf("Valor invalido! O valor deve ser maior que zero.\n");
     }
 }
+
 void alteraValorCusto(Produto *produto, int numProdutos, int i)
 {
     printf("\n========================================== Editar Valor de Custo ===========================================\n");
