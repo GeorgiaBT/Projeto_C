@@ -1,5 +1,4 @@
-/*
-=====================================================================================
+/*=======================================================================
    Autores: Geórgia Borges e Gileade Ramos
    Data de Criação: 27/10/2024
    Última Modificação: 21/11/2024
@@ -7,7 +6,7 @@
    clientes. Permite cadastro, listagem, exclusão e edição de produtos e clientes,
    além de poder realizar pedidos, e os dados de clientes, produtos e pedidos
    são armazenados em arquivos, permitindo a continuidade dos dados entre execuções.
-=====================================================================================
+   =======================================================================
 */
 
 #include <stdio.h>
@@ -1241,25 +1240,25 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
         if (strcmp(clientes[i].cpf, cpf) == 0)
         {
             clienteEncontrado = true;
-        }
 
-        if (strcmp(clientes[i].ativo, "Inativo") == 0)
-        {
-            printf("O cliente está inativo e não pode realizar pedidos.\n");
-            return;
+            if (strcmp(clientes[i].ativo, "Inativo") == 0)
+            {
+                printf("O cliente esta inativo e nao pode realizar pedidos.\n");
+                return;
+            }
+            printf("---CLIENTE ENCONTRADO---\n");
+            printf("Nome: %s\n", clientes[i].nome);
+            printf("Endereco: %s\n", clientes[i].endereco);
+            printf("Telefone: %s\n", clientes[i].telefone);
+            printf("Email: %s\n", clientes[i].email);
+            printf("-------------------------\n");
+            break;
         }
-        printf("---CLIENTE ENCONTRADO---\n");
-        printf("Nome: %s\n", clientes[i].nome);
-        printf("Endereco: %s\n", clientes[i].endereco);
-        printf("Telefone: %s\n", clientes[i].telefone);
-        printf("Email: %s\n", clientes[i].email);
-        printf("-------------------------\n");
-        break;
     }
 
     if (clienteEncontrado == false)
     {
-        printf("Cliente não encontrado!\n");
+        printf("Cliente nao encontrado!\n");
         return;
     }
 
