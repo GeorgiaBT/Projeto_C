@@ -1,3 +1,15 @@
+/*
+=====================================================================================
+   Autores: Geórgia Borges e Gileade Ramos
+   Data de Criação: 27/10/2024
+   Última Modificação: 21/11/2024
+   Descrição: Este código implementa um sistema de gerenciamento de estoque e
+   clientes. Permite cadastro, listagem, exclusão e edição de produtos e clientes,
+   além de poder realizar pedidos, e os dados de clientes, produtos e pedidos
+   são armazenados em arquivos, permitindo a continuidade dos dados entre execuções.
+=====================================================================================
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -311,7 +323,7 @@ int menuClientes()
     printf("=====================================\n");
     printf("           Menu de Cliente           \n");
     printf("=====================================\n");
-    printf("1 - Cadastros\n");
+    printf("1 - Cadastros/Gestao\n");
     printf("2 - Listar clientes\n");
     printf("3 - Realizar um pedido\n");
     printf("4 - Voltar\n");
@@ -375,7 +387,7 @@ int menuEstoque()
     printf("=====================================\n");
     printf("           Menu de Estoque           \n");
     printf("=====================================\n");
-    printf("1 - Cadastros\n");
+    printf("1 - Cadastros/Gestao\n");
     printf("2 - Visualizar estoque\n");
     printf("3 - Voltar\n");
     printf("=====================================\n");
@@ -458,7 +470,7 @@ int menuCadastroEstoque()
     int opcao;
     system(LIMPAR);
     printf("=====================================\n");
-    printf("         Cadastro de Estoque         \n");
+    printf("          Gestão de Produtos         \n");
     printf("=====================================\n");
     printf("1 - Cadastrar produto\n");
     printf("2 - Excluir produto\n");
@@ -513,7 +525,7 @@ Cliente *cadastroClientes(Cliente *clientes, int *numCliente)
     scanf(" %50[^\n]", novoCliente->nome);
     printf("Digite o telefone: ");
     scanf(" %14s", novoCliente->telefone);
-    printf("Digite o endereço: ");
+    printf("Digite o endereco: ");
     scanf(" %99[^\n]", novoCliente->endereco);
     printf("Digite o email: ");
     scanf(" %49s", novoCliente->email);
@@ -676,7 +688,7 @@ Cliente *excluirCliente(Cliente *clientes, int *numCliente)
         {
             clienteEncontrado = true;
 
-            printf("\nCliente encontrado:\n");
+            printf("\n---CLIENTE ENCONTRADO--- :\n");
             printf("Nome: %s\nCPF: %s\nTelefone: %s\n", cliente->nome, cliente->cpf, cliente->telefone);
             printf("Email: %s\nEndereco: %s\nStatus: %s\n", cliente->email, cliente->endereco, cliente->ativo);
 
@@ -770,7 +782,7 @@ void excluirClienteFile(char *cpfExcluir)
 void listarProdutos(Produto *produto, int numProduto)
 {
     system(LIMPAR);
-    printf("===================================== Produtos do Estoque =======================================\n");
+    printf("===================================== Lista de Produtos do Estoque =======================================\n");
     if (numProduto == 0)
     {
         printf("Nao ha produtos cadastrados no estoque.\n");
@@ -783,13 +795,13 @@ void listarProdutos(Produto *produto, int numProduto)
     int i = 1;
     for (produtoAtual = produto; produtoAtual < produto + numProduto; produtoAtual++)
     {
-        printf("Produto %d:\n", i);
+        printf("\n_____________________ Produto %d _____________________\n", i);
         printf("Codigo: %d\n", produtoAtual->codigo);
         printf("Nome: %s\n", produtoAtual->nome);
         printf("Quantidade: %d\n", produtoAtual->quantidade);
         printf("Valor de Custo: %.2f\n", produtoAtual->valorDeCusto);
         printf("Valor de Venda: %.2f\n", produtoAtual->valorDeVenda);
-        printf("-------------------------\n");
+        printf("_____________________________________________________\n");
         i++;
     }
 }
@@ -811,14 +823,14 @@ void listaTodosClientes(Cliente *clientes, int numClientes)
     int i = 1;
     for (clienteAtual = clientes; clienteAtual < clientes + numClientes; clienteAtual++)
     {
-        printf("\n========================== Cliente %d ==========================\n", i);
+        printf("\n______________________ Cliente %d _____________________\n", i);
         printf("\nNome:      %-40s\n", clienteAtual->nome);
         printf("CPF:       %-40s\n", clienteAtual->cpf);
         printf("Endereco:  %-40s\n", clienteAtual->endereco);
         printf("Telefone:  %-40s\n", clienteAtual->telefone);
         printf("Email:     %-40s\n", clienteAtual->email);
         printf("Status:     %-40s\n", clienteAtual->ativo);
-        printf("-------------------------------------------------------------\n");
+        printf("______________________________________________________\n");
         i++;
     }
 }
@@ -909,7 +921,7 @@ void excluiProduto(Produto *produto, int *numProduto)
         {
             produtoEncontrado = true;
 
-            printf("\nProduto encontrado:\n");
+            printf("\n---PRODUTO ENCONTRADO---\n");
             printf("Codigo: %d\nNome: %s\nQuantidade: %d\n", produtos->codigo, produtos->nome, produtos->quantidade);
             printf("Valor de Custo: %.2f\nValor de Venda: %.2f\n", produtos->valorDeCusto, produtos->valorDeVenda);
 
@@ -1004,6 +1016,8 @@ void excluirProdutoFile(int codigoExcluir)
 
 void buscarProduto(Produto *produto, int numProduto)
 {
+    system(LIMPAR);
+    printf("===================================== Buscar Produto =======================================\n");
     int codBusca, i;
     bool prodEncontrado = false;
 
@@ -1016,7 +1030,7 @@ void buscarProduto(Produto *produto, int numProduto)
         {
             prodEncontrado = true;
 
-            printf("\n---Produto encontrado---\n");
+            printf("\n---PRODUTO ENCONTRAO---\n");
             printf("Codigo: %d\n", produto[i].codigo);
             printf("Nome: %s\n", produto[i].nome);
             printf("Quantidade: %d\n", produto[i].quantidade);
@@ -1035,7 +1049,8 @@ void buscarProduto(Produto *produto, int numProduto)
 
 void buscaCLiente(Cliente *clientes, int numClientes)
 {
-
+    system(LIMPAR);
+    printf("===================================== Buscar Cliente =======================================\n");
     Cliente *clienteAtual;
     bool clienteEncontrado = false;
     char cpfBusca[11];
@@ -1049,7 +1064,7 @@ void buscaCLiente(Cliente *clientes, int numClientes)
         {
             clienteEncontrado = true;
 
-            printf("\n---Cliente encontrado---\n");
+            printf("\n---CLIENTE ENCONTRADO---\n");
             printf("Nome: %s\n", clienteAtual->nome);
             printf("CPF: %s\n", clienteAtual->cpf);
             printf("Telefone: %s\n", clienteAtual->telefone);
@@ -1073,17 +1088,16 @@ void inserirEstoque(Produto *produto, int numProduto)
     int codProduto, i;
     bool prodEncontrado = false;
 
-    printf("========================================== Alterar ===========================================\n");
+    printf("========================================== Editar Produto ===========================================\n");
     printf("Digite o codigo do produto pra alterar ao estoque: ");
     scanf("%d", &codProduto);
-    system(LIMPAR);
 
     for (i = 0; i < numProduto; i++)
     {
         if (produto[i].codigo == codProduto)
         {
             prodEncontrado = true;
-            printf("\nProduto encontrado:\n");
+            printf("\n---PRODUTO ENCONTRADO---\n");
             printf("Codigo: %d\n", produto[i].codigo);
             printf("Nome: %s\n", produto[i].nome);
             printf("Quantidade atual em estoque: %d\n", produto[i].quantidade);
@@ -1115,7 +1129,7 @@ int menuAlterarEstoque()
 
     int escolherAltercao;
     printf("==========================================\n");
-    printf("                Alterar                   \n");
+    printf("               Editar Estoque             \n");
     printf("==========================================\n");
     printf("1 - Inserir Quantidade no Estoque\n");
     printf("2 - Alterar Valor de Custo\n");
@@ -1124,6 +1138,7 @@ int menuAlterarEstoque()
     printf("==========================================\n");
     printf("Digite a opção que deseja alterar: ");
     scanf("%d", &escolherAltercao);
+    system(LIMPAR);
     return escolherAltercao;
 }
 
@@ -1153,6 +1168,7 @@ void switchAlteracao(int alteracao, Produto *produto, int numProduto, int i)
 
 void alteraValorVenda(Produto *produto, int numProdutos, int i)
 {
+    printf("\n========================================== Editar Valor de Venda ===========================================\n");
 
     float vVendaAlterar;
 
@@ -1171,6 +1187,7 @@ void alteraValorVenda(Produto *produto, int numProdutos, int i)
 }
 void alteraValorCusto(Produto *produto, int numProdutos, int i)
 {
+    printf("\n========================================== Editar Valor de Custo ===========================================\n");
 
     float vCustoAlterar;
     printf("Digite o valor a ser alterado: ");
@@ -1189,6 +1206,7 @@ void alteraValorCusto(Produto *produto, int numProdutos, int i)
 
 void alteraQTD(Produto *produto, int numProdutos, int i)
 {
+    printf("\n========================================== Editar Quantidade ===========================================\n");
 
     int qtdAdicionar;
     printf("Digite a quantidade a ser adicionada: ");
@@ -1207,6 +1225,9 @@ void alteraQTD(Produto *produto, int numProdutos, int i)
 
 void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int numProdutos)
 {
+    system(LIMPAR);
+    printf("\n========================================== Realizar Pedido ===========================================\n");
+
     char cpf[12];
     int codigoProduto, quantidadeNova, i, j;
     bool clienteEncontrado = false, produtoEncontrado = false;
@@ -1227,7 +1248,12 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
             printf("O cliente está inativo e não pode realizar pedidos.\n");
             return;
         }
-        printf("Cliente encontrado: %s\n", clientes[i].nome);
+        printf("---CLIENTE ENCONTRADO---\n");
+        printf("Nome: %s\n", clientes[i].nome);
+        printf("Endereco: %s\n", clientes[i].endereco);
+        printf("Telefone: %s\n", clientes[i].telefone);
+        printf("Email: %s\n", clientes[i].email);
+        printf("-------------------------\n");
         break;
     }
 
@@ -1237,7 +1263,7 @@ void realizarPedido(Cliente *clientes, int numClientes, Produto *produtos, int n
         return;
     }
 
-    printf("Digite o código do produto: ");
+    printf("Digite o codigo do produto: ");
     scanf("%d", &codigoProduto);
 
     for (j = 0; j < numProdutos; j++)
@@ -1363,7 +1389,7 @@ void editarCliente(Cliente *clientes, int numClientes)
     int i;
 
     printf("========================================== Editar Cliente ===========================================\n");
-    printf("Digite o CPF do cliente para editar (somente números): ");
+    printf("Digite o CPF do cliente para editar (somente numeros): ");
     scanf("%s", cpf);
     system(LIMPAR);
 
@@ -1372,7 +1398,7 @@ void editarCliente(Cliente *clientes, int numClientes)
         if (strcmp(clientes[i].cpf, cpf) == 0)
         {
             clienteEncontrado = true;
-            printf("\nCliente encontrado:\n");
+            printf("\n---CLIENTE ENCONTRADO---\n");
             printf("Nome: %s\n", clientes[i].nome);
             printf("CPF: %s\n", clientes[i].cpf);
             printf("Telefone atual: %s\n", clientes[i].telefone);
@@ -1401,9 +1427,9 @@ int menuAlterarCliente()
 {
     int escolherAlteracao;
     printf("==========================================\n");
-    printf("           Alterar Cliente                \n");
+    printf("            Editar Cliente                \n");
     printf("==========================================\n");
-    printf("1 - Situação do Cadastro\n");
+    printf("1 - Status do Cadastro\n");
     printf("2 - Alterar Telefone\n");
     printf("3 - Alterar Email\n");
     printf("4 - Alterar Endereço\n");
@@ -1411,11 +1437,13 @@ int menuAlterarCliente()
     printf("==========================================\n");
     printf("Digite a opção que deseja alterar: ");
     scanf("%d", &escolherAlteracao);
+    system(LIMPAR);
     return escolherAlteracao;
 }
 
 void editarSituacao(Cliente *clientes, int i, int numClientes)
 {
+    printf("\n========================================== Editar Status ===========================================\n");
 
     char confirmar;
 
@@ -1490,6 +1518,8 @@ void switchAlteracaoCliente(int alteracao, Cliente *clientes, int i, int numClie
 
 void alteraTelefone(Cliente *clientes, int i, int numClientes)
 {
+    printf("\n========================================== Editar Telefone ===========================================\n");
+
     char novoTelefone[15];
     printf("Digite o novo telefone: ");
     scanf("%s", novoTelefone);
@@ -1500,6 +1530,7 @@ void alteraTelefone(Cliente *clientes, int i, int numClientes)
 
 void alteraEmail(Cliente *clientes, int i, int numClientes)
 {
+    printf("\n========================================== Editar Email ===========================================\n");
     char novoEmail[50];
     printf("Digite o novo email: ");
     scanf("%s", novoEmail);
@@ -1510,6 +1541,7 @@ void alteraEmail(Cliente *clientes, int i, int numClientes)
 
 void alteraEndereco(Cliente *clientes, int i, int numClientes)
 {
+    printf("\n========================================== Editar Endereco ===========================================\n");
     char novoEndereco[100];
     printf("Digite o novo endereço: ");
     scanf(" %[^\n]s", novoEndereco);
